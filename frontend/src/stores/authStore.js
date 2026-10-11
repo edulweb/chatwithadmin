@@ -1,0 +1,137 @@
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import api from '@/services/api'
+import { disconnectEcho } from '@/services/echo'
+
+export const useAuthStore = defineStore('auth', () => {
+  const token = ref(localStorage.getItem('chatbox_token') || null)
+  const user = ref(JSON.parse(localStorage.getItem('chatbox_user') || 'null'))
+  const loading = ref(false)
+  const error = ref(null)
+
+  const isAuthenticated = computed(() => !!token.value && !!user.value)
+
+  async function register(form) {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.post('/auth/register', form)
+      token.value = response.data.data.token
+      user.value = response.data.data.user
+      localStorage.setItem('chatbox_token', token.value)
+      localStorage.setItem('chatbox_user', JSON.stringify(user.value))
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Registration failed'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function login(form) {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.post('/auth/login', form)
+      token.value = response.data.data.token
+      user.value = response.data.data.user
+      localStorage.setItem('chatbox_token', token.value)
+      localStorage.setItem('chatbox_user', JSON.stringify(user.value))
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Login failed'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function logout() {
+    try {
+      if (token.value) {
+        await api.post('/auth/logout')
+      }
+    } catch (e) {
+      // Ignore network errors on logout
+    } finally {
+      token.value = null
+      user.value = null
+      localStorage.removeItem('chatbox_token')
+      localStorage.removeItem('chatbox_user')
+      disconnectEcho()
+    }
+  }
+
+  async function fetchMe() {
+    if (!token.value) return null
+    try {
+      const response = await api.get('/me')
+      user.value = response.data.data
+      localStorage.setItem('chatbox_user', JSON.stringify(user.value))
+      return user.value
+    } catch (err) {
+      if (err.response?.status === 401) {
+        logout()
+      }
+      throw err
+    }
+  }
+
+  async function updateProfile(formData) {
+    loading.value = true
+    error.value = null
+    try {
+      // If uploading an avatar file, send multipart/form-data
+      const config = {}
+      if (formData instanceof FormData) {
+        // In Laravel, multipart with PATCH requires _method: PATCH with POST
+        formData.append('_method', 'PATCH')
+        const response = await api.post('/me', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        user.value = response.data.data
+        localStorage.setItem('chatbox_user', JSON.stringify(user.value))
+        return response.data
+      } else {
+        const response = await api.patch('/me', formData)
+        user.value = response.data.data
+        localStorage.setItem('chatbox_user', JSON.stringify(user.value))
+        return response.data
+      }
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Update failed'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function changePassword(form) {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.post('/me/password', form)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Password change failed'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return {
+    token,
+    user,
+    loading,
+    error,
+    isAuthenticated,
+    register,
+    login,
+    logout,
+    fetchMe,
+    updateProfile,
+    changePassword,
+  }
+})
