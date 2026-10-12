@@ -16,6 +16,11 @@ Route::prefix('v1')->group(function () {
     Route::prefix('auth')->middleware('throttle:15,1')->group(function () {
         Route::post('register', [AuthController::class, 'register']);
         Route::post('login', [AuthController::class, 'login']);
+        Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+        Route::post('reset-password', [AuthController::class, 'resetPassword']);
+        Route::post('activate', [AuthController::class, 'activateAccount']);
+        Route::post('verify-email-change', [AuthController::class, 'verifyEmailChange']);
+        Route::post('resend-activation', [AuthController::class, 'resendActivation']);
     });
 
     // Dynamic broadcasting configuration (driver, keys, endpoints without secrets)

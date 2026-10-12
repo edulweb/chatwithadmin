@@ -1,0 +1,33 @@
+# ==============================================================================
+# Production .htaccess for Root / Shared Hosting / Subfolder Deployments
+# Redirects all incoming web traffic into backend/public while securing files
+# ==============================================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Prevent directory browsing
+    <IfModule mod_negotiation.c>
+        Options -Indexes
+    </IfModule>
+
+    # Block sensitive files and directories from web access
+    RewriteRule ^(\.git|\.env|\.user\.ini|composer\.(json|lock)|package(-lock)?\.json|vite\.config\.js) - [F,L,NC]
+    RewriteRule ^(backend/(app|bootstrap|config|database|resources|routes|storage/framework|tests|vendor)) - [F,L,NC]
+    RewriteRule ^(frontend/(src|node_modules)) - [F,L,NC]
+
+    # Rewrite all traffic to backend/public directory
+    RewriteCond %{REQUEST_URI} !^/backend/public/
+    RewriteRule ^(.*)$ backend/public/$1 [L]
+</IfModule>
+
+# Block access to hidden dotfiles (e.g. .env, .git)
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

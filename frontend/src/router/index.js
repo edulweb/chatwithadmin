@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import ChatView from '@/views/ChatView.vue'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
+import ActivateAccountView from '@/views/ActivateAccountView.vue'
+import ResetPasswordView from '@/views/ResetPasswordView.vue'
+import VerifyEmailChangeView from '@/views/VerifyEmailChangeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,6 +26,24 @@ const router = createRouter({
       name: 'register',
       component: RegisterView,
       meta: { guestOnly: true },
+    },
+    {
+      path: '/activate-account',
+      name: 'activate-account',
+      component: ActivateAccountView,
+      meta: { guestOnly: false },
+    },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: ResetPasswordView,
+      meta: { guestOnly: false },
+    },
+    {
+      path: '/verify-email-change',
+      name: 'verify-email-change',
+      component: VerifyEmailChangeView,
+      meta: { guestOnly: false },
     },
     {
       path: '/:pathMatch(.*)*',

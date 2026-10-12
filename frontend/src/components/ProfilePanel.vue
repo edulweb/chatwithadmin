@@ -196,6 +196,16 @@ async function handleLogout() {
             />
           </div>
 
+          <!-- Pending Email Verification Notice -->
+          <div v-if="authStore.user?.pending_email" class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-[11px] text-amber-800 dark:text-amber-300 space-y-1">
+            <div class="font-semibold flex items-center gap-1.5">
+              <span>Verification Pending</span>
+            </div>
+            <p>
+              A confirmation link was sent to <strong class="underline">{{ authStore.user.pending_email }}</strong>. Your email will not update until you click that link.
+            </p>
+          </div>
+
           <div>
             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
             <input
@@ -204,6 +214,9 @@ async function handleLogout() {
               required
               class="w-full text-xs px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
+            <p class="text-[10px] text-gray-400 mt-1">
+              Changing your email will send a verification link to the new address before taking effect.
+            </p>
           </div>
 
           <button

@@ -43,18 +43,35 @@ class UserController extends Controller
 
     public function store(AdminCreateUserRequest $request): JsonResponse
     {
+        $activationToken = \Illuminate\Support\Str::random(40);
+        $requireActivation = (bool) $request->input('require_activation', true);
+
         $user = User::create([
             'name' => $request->name,
             'username' => strtolower($request->username),
             'email' => strtolower($request->email),
             'password' => Hash::make($request->password),
             'is_admin' => (bool) $request->input('is_admin', false),
+            'is_active' => !$requireActivation,
+            'email_verified_at' => $requireActivation ? null : now(),
+            'activation_token' => $requireActivation ? $activationToken : null,
             'last_seen_at' => null,
         ]);
 
+        if ($requireActivation) {
+            try {
+                $user->notify(new \App\Notifications\AccountActivationNotification($activationToken));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to send activation email: ' . $e->getMessage());
+            }
+        }
+
         return response()->json([
-            'message' => 'User registered successfully by administrator',
+            'message' => $requireActivation
+                ? 'User registered successfully. An account activation email has been sent.'
+                : 'User registered successfully by administrator.',
             'data' => new UserResource($user),
+            'activation_token' => $requireActivation ? $activationToken : null,
         ], 201);
     }
 

@@ -25,11 +25,15 @@ class User extends Authenticatable
         'name',
         'username',
         'email',
+        'pending_email',
         'password',
         'avatar_path',
         'last_seen_at',
+        'email_verified_at',
         'is_admin',
         'is_disabled',
+        'is_active',
+        'activation_token',
     ];
 
     /**
@@ -40,6 +44,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'activation_token',
     ];
 
     /**
@@ -55,6 +60,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'is_disabled' => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -66,6 +72,16 @@ class User extends Authenticatable
     public function isDisabled(): bool
     {
         return (bool) $this->is_disabled;
+    }
+
+    public function isActive(): bool
+    {
+        return (bool) $this->is_active;
+    }
+
+    public function isActivated(): bool
+    {
+        return $this->isActive() && $this->email_verified_at !== null;
     }
 
     /**

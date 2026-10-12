@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
                 'username' => 'alex',
                 'password' => Hash::make('password123'),
                 'is_admin' => true,
+                'is_active' => true,
+                'email_verified_at' => now(),
                 'last_seen_at' => now(),
             ]
         );
@@ -34,6 +36,8 @@ class DatabaseSeeder extends Seeder
                 'username' => 'sarah',
                 'password' => Hash::make('password123'),
                 'is_admin' => false,
+                'is_active' => true,
+                'email_verified_at' => now(),
                 'last_seen_at' => now()->subMinutes(1),
             ]
         );
@@ -45,6 +49,8 @@ class DatabaseSeeder extends Seeder
                 'username' => 'david',
                 'password' => Hash::make('password123'),
                 'is_admin' => false,
+                'is_active' => true,
+                'email_verified_at' => now(),
                 'last_seen_at' => now()->subHours(2),
             ]
         );

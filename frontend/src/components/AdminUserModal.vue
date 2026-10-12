@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref } from 'vue'
 import { X, UserPlus, ShieldCheck, User, AtSign, Mail, Lock, Loader2, AlertCircle, CheckCircle2 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/authStore'
@@ -17,6 +17,7 @@ const email = ref('')
 const password = ref('')
 const passwordConfirmation = ref('')
 const isUserAdmin = ref(false)
+const requireActivation = ref(true)
 const errorMessage = ref(null)
 const successUser = ref(null)
 const isLoading = ref(false)
@@ -33,6 +34,7 @@ async function handleRegister() {
       password: password.value,
       password_confirmation: passwordConfirmation.value,
       is_admin: isUserAdmin.value,
+      require_activation: requireActivation.value,
     })
     successUser.value = res.data
     // Refresh user search results or conversations if needed
@@ -90,6 +92,9 @@ async function startChatWithCreatedUser() {
           <p class="text-xs text-gray-500 max-w-xs mx-auto">
             <span class="font-semibold text-gray-800 dark:text-gray-200">{{ successUser.name }}</span> (@{{ successUser.username }}) has been registered {{ successUser.is_admin ? 'as an Administrator' : 'as a Regular User' }}.
           </p>
+          <div v-if="!successUser.is_active" class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-700 dark:text-amber-300 text-[11px] text-center max-w-xs mx-auto">
+            An activation link has been sent to {{ successUser.email }}. The user must activate their account before signing in.
+          </div>
 
           <div class="pt-3 flex gap-2 justify-center">
             <button
@@ -102,7 +107,7 @@ async function startChatWithCreatedUser() {
             <button
               type="button"
               class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-semibold text-xs transition-colors cursor-pointer"
-              @click="successUser = null; name = ''; username = ''; email = ''; password = ''; passwordConfirmation = ''; isUserAdmin = false;"
+              @click="successUser = null; name = ''; username = ''; email = ''; password = ''; passwordConfirmation = ''; isUserAdmin = false; requireActivation = true;"
             >
               Register Another
             </button>
@@ -199,7 +204,7 @@ async function startChatWithCreatedUser() {
           </div>
 
           <!-- Role Toggle -->
-          <div class="flex items-center gap-2 pt-1 pb-1">
+          <div class="flex items-center gap-2 pt-1">
             <input
               id="modalAdminCheck"
               v-model="isUserAdmin"
@@ -208,6 +213,19 @@ async function startChatWithCreatedUser() {
             />
             <label for="modalAdminCheck" class="text-xs text-gray-700 dark:text-gray-300 font-medium cursor-pointer">
               Grant Administrator Privileges (Admin Role)
+            </label>
+          </div>
+
+          <!-- Activation Email Toggle -->
+          <div class="flex items-center gap-2 pb-1">
+            <input
+              id="modalRequireActivation"
+              v-model="requireActivation"
+              type="checkbox"
+              class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer"
+            />
+            <label for="modalRequireActivation" class="text-xs text-gray-700 dark:text-gray-300 font-medium cursor-pointer">
+              Send Email Activation Link (User must activate before login)
             </label>
           </div>
 

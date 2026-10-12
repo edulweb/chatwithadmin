@@ -19,11 +19,26 @@ class CheckUserActive
 
         if ($user && $user->isDisabled()) {
             // Revoke current token if using Sanctum
-            $request->user()->currentAccessToken()?->delete();
+            $token = $request->user()->currentAccessToken();
+            if ($token instanceof \Laravel\Sanctum\PersonalAccessToken) {
+                $token->delete();
+            }
 
             return response()->json([
                 'message' => 'Your account has been disabled by an administrator. Please contact support.',
                 'account_disabled' => true,
+            ], 403);
+        }
+
+        if ($user && (!$user->isActive() || $user->email_verified_at === null)) {
+            $token = $request->user()->currentAccessToken();
+            if ($token instanceof \Laravel\Sanctum\PersonalAccessToken) {
+                $token->delete();
+            }
+
+            return response()->json([
+                'message' => 'Your account has not been activated or verified yet.',
+                'account_unactivated' => true,
             ], 403);
         }
 

@@ -149,6 +149,80 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function forgotPassword(email) {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.post('/auth/forgot-password', { email })
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Failed to send password reset email'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function resetPassword(form) {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.post('/auth/reset-password', form)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || err.response?.data?.errors?.token?.[0] || 'Password reset failed'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function activateAccount(tokenValue) {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.post('/auth/activate', { token: tokenValue })
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Account activation failed'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function verifyEmailChange(tokenValue) {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.post('/auth/verify-email-change', { token: tokenValue })
+      if (response.data?.data && user.value && user.value.id === response.data.data.id) {
+        user.value = response.data.data
+        localStorage.setItem('chatbox_user', JSON.stringify(user.value))
+      }
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Email verification failed'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function resendActivation(loginValue) {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.post('/auth/resend-activation', { login: loginValue })
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Failed to resend activation email'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     token,
     user,
@@ -164,5 +238,10 @@ export const useAuthStore = defineStore('auth', () => {
     fetchMe,
     updateProfile,
     changePassword,
+    forgotPassword,
+    resetPassword,
+    activateAccount,
+    verifyEmailChange,
+    resendActivation,
   }
 })
