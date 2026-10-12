@@ -43,7 +43,7 @@ Route::prefix('v1')->group(function () {
     Route::get('attachments/{attachment}/download', [AttachmentController::class, 'download']);
 
     // Authenticated API routes
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'check.active'])->group(function () {
         // Auth & Profile
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
@@ -52,6 +52,10 @@ Route::prefix('v1')->group(function () {
 
         // Users & Blocking
         Route::get('users', [UserController::class, 'index']);
+        Route::post('users', [UserController::class, 'store']);
+        Route::post('admin/users', [UserController::class, 'store']);
+        Route::post('admin/users/{id}/disable', [UserController::class, 'disable']);
+        Route::post('admin/users/{id}/enable', [UserController::class, 'enable']);
         Route::post('users/{id}/block', [UserController::class, 'block']);
         Route::delete('users/{id}/block', [UserController::class, 'unblock']);
         Route::get('blocked-users', [UserController::class, 'blockedUsers']);

@@ -47,9 +47,17 @@ onMounted(async () => {
         <!-- Mobile Header with Back Button -->
         <MobileChatHeader class="flex md:hidden" />
 
+        <!-- Disabled Account Banner -->
+        <div
+          v-if="chatStore.activeConversation.other_user?.is_disabled"
+          class="bg-rose-50 dark:bg-rose-950/60 border-b border-rose-200 dark:border-rose-900/60 px-4 py-2.5 text-xs text-rose-700 dark:text-rose-300 text-center font-medium select-none"
+        >
+          This account has been disabled by an administrator. Messages cannot be sent.
+        </div>
+
         <!-- Blocked Banner if user is blocked by other or has blocked other -->
         <div
-          v-if="chatStore.activeConversation.is_blocked"
+          v-else-if="chatStore.activeConversation.is_blocked"
           class="bg-rose-50 dark:bg-rose-950/50 border-b border-rose-200 dark:border-rose-900/60 px-4 py-2.5 text-xs text-rose-700 dark:text-rose-300 text-center font-medium select-none"
         >
           You cannot reply to this conversation because you have been blocked by this user.
@@ -65,9 +73,9 @@ onMounted(async () => {
         <!-- Messages List -->
         <MessageList />
 
-        <!-- Message Composer (Disabled if blocked) -->
+        <!-- Message Composer (Disabled if blocked or disabled) -->
         <MessageComposer
-          v-if="!chatStore.activeConversation.is_blocked && !chatStore.activeConversation.has_blocked_other"
+          v-if="!chatStore.activeConversation.is_blocked && !chatStore.activeConversation.has_blocked_other && !chatStore.activeConversation.other_user?.is_disabled"
         />
       </template>
 

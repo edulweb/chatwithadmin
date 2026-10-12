@@ -19,9 +19,10 @@ class DatabaseSeeder extends Seeder
         $alex = User::updateOrCreate(
             ['email' => 'alex@chatbox.test'],
             [
-                'name' => 'Alex Morgan',
+                'name' => 'Alex Morgan (Admin)',
                 'username' => 'alex',
                 'password' => Hash::make('password123'),
+                'is_admin' => true,
                 'last_seen_at' => now(),
             ]
         );
@@ -32,6 +33,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Sarah Connor',
                 'username' => 'sarah',
                 'password' => Hash::make('password123'),
+                'is_admin' => false,
                 'last_seen_at' => now()->subMinutes(1),
             ]
         );
@@ -42,6 +44,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'David Kim',
                 'username' => 'david',
                 'password' => Hash::make('password123'),
+                'is_admin' => false,
                 'last_seen_at' => now()->subHours(2),
             ]
         );

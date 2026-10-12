@@ -85,9 +85,23 @@ const isSnippetDeleted = computed(() => {
 
     <div class="flex-1 min-w-0">
       <div class="flex items-center justify-between mb-1">
-        <h3 class="text-sm font-semibold truncate" :class="isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-900 dark:text-gray-100'">
-          {{ otherUser?.name || 'Direct Chat' }}
-        </h3>
+        <div class="flex items-center gap-1.5 min-w-0">
+          <h3 class="text-sm font-semibold truncate" :class="isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-900 dark:text-gray-100'">
+            {{ otherUser?.name || 'Direct Chat' }}
+          </h3>
+          <span
+            v-if="otherUser?.is_admin"
+            class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 flex-shrink-0"
+          >
+            Admin
+          </span>
+          <span
+            v-if="otherUser?.is_disabled"
+            class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 flex-shrink-0"
+          >
+            Disabled
+          </span>
+        </div>
         <span class="text-[11px] text-gray-400 dark:text-gray-500 flex-shrink-0 ml-2">
           {{ formattedTime }}
         </span>

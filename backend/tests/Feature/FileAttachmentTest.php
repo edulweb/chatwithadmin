@@ -18,6 +18,7 @@ class FileAttachmentTest extends TestCase
 
     private function setupConversation(User $user1, User $user2): Conversation
     {
+        $user1->update(['is_admin' => true]);
         $pair = Conversation::makeCanonicalPair($user1->id, $user2->id);
         $conv = Conversation::create(['canonical_pair' => $pair, 'type' => 'direct']);
         ConversationMember::create(['conversation_id' => $conv->id, 'user_id' => $user1->id]);

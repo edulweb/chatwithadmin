@@ -9,13 +9,10 @@ export const useUserStore = defineStore('user', () => {
   const isLoadingBlocked = ref(false)
 
   async function searchUsers(query = '') {
-    if (!query || query.trim() === '') {
-      searchResults.value = []
-      return []
-    }
     isSearching.value = true
     try {
-      const response = await api.get('/users', { params: { search: query.trim() } })
+      const params = query && query.trim() !== '' ? { search: query.trim() } : {}
+      const response = await api.get('/users', { params })
       searchResults.value = response.data.data
       return searchResults.value
     } catch (err) {
@@ -60,6 +57,26 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function disableUser(userId) {
+    try {
+      const response = await api.post(`/admin/users/${userId}/disable`)
+      return response.data
+    } catch (err) {
+      console.error('Failed to disable user:', err)
+      throw err
+    }
+  }
+
+  async function enableUser(userId) {
+    try {
+      const response = await api.post(`/admin/users/${userId}/enable`)
+      return response.data
+    } catch (err) {
+      console.error('Failed to enable user:', err)
+      throw err
+    }
+  }
+
   return {
     searchResults,
     isSearching,
@@ -69,5 +86,7 @@ export const useUserStore = defineStore('user', () => {
     fetchBlockedUsers,
     blockUser,
     unblockUser,
+    disableUser,
+    enableUser,
   }
 })

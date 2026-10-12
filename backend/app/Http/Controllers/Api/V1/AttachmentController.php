@@ -14,11 +14,12 @@ class AttachmentController extends Controller
 {
     public function download(Request $request, MessageAttachment $attachment): Response
     {
-        // Support token in query parameter for direct browser <img> and download links
+        // Support token in query parameter for direct browser <img>, <video>, <audio>, and download links
         if (!$request->user() && $request->filled('token')) {
             $token = PersonalAccessToken::findToken($request->query('token'));
             if ($token && $token->tokenable) {
                 auth()->setUser($token->tokenable);
+                $request->setUserResolver(fn () => $token->tokenable);
             }
         }
 

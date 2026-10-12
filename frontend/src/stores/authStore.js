@@ -10,6 +10,7 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref(null)
 
   const isAuthenticated = computed(() => !!token.value && !!user.value)
+  const isAdmin = computed(() => Boolean(user.value?.is_admin))
 
   async function register(form) {
     loading.value = true
@@ -60,6 +61,19 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.removeItem('chatbox_token')
       localStorage.removeItem('chatbox_user')
       disconnectEcho()
+    }
+  }
+
+  function forceLogoutDisabled(reason = 'Your account has been disabled by an administrator.') {
+    token.value = null
+    user.value = null
+    localStorage.removeItem('chatbox_token')
+    localStorage.removeItem('chatbox_user')
+    disconnectEcho()
+    sessionStorage.setItem('auth_notice', reason)
+    alert(reason)
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login'
     }
   }
 
@@ -121,15 +135,32 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function adminRegisterUser(form) {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.post('/admin/users', form)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Failed to register user'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     token,
     user,
     loading,
     error,
     isAuthenticated,
+    isAdmin,
     register,
+    adminRegisterUser,
     login,
     logout,
+    forceLogoutDisabled,
     fetchMe,
     updateProfile,
     changePassword,

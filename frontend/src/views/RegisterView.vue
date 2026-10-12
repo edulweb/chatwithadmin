@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { MessageCircle, Lock, Mail, User, AtSign, Loader2, AlertCircle } from 'lucide-vue-next'
+import { MessageCircle, Lock, Mail, User, AtSign, Loader2, AlertCircle, ShieldCheck, ArrowLeft } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/authStore'
 
 const router = useRouter()
@@ -12,21 +12,34 @@ const username = ref('')
 const email = ref('')
 const password = ref('')
 const passwordConfirmation = ref('')
+const isUserAdmin = ref(false)
 const errorMessage = ref(null)
+const successMessage = ref(null)
 const isLoading = ref(false)
 
 async function handleRegister() {
   errorMessage.value = null
+  successMessage.value = null
   isLoading.value = true
   try {
-    await authStore.register({
+    await authStore.adminRegisterUser({
       name: name.value,
       username: username.value,
       email: email.value,
       password: password.value,
       password_confirmation: passwordConfirmation.value,
+      is_admin: isUserAdmin.value,
     })
-    router.push('/')
+    successMessage.value = `User "${name.value}" registered successfully!`
+    name.value = ''
+    username.value = ''
+    email.value = ''
+    password.value = ''
+    passwordConfirmation.value = ''
+    isUserAdmin.value = false
+    setTimeout(() => {
+      router.push('/')
+    }, 1200)
   } catch (err) {
     const errors = err.response?.data?.errors
     if (errors) {
@@ -43,15 +56,15 @@ async function handleRegister() {
 <template>
   <div class="min-h-screen w-full flex items-center justify-center p-4 bg-slate-50 dark:bg-gray-950 font-sans select-none">
     <div class="w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 p-8 sm:p-10">
-      <!-- ChatBox Logo -->
+      <!-- ChatBox Logo & Header -->
       <div class="flex flex-col items-center text-center mb-6">
         <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 mb-3">
-          <MessageCircle class="w-8 h-8 fill-current" />
+          <ShieldCheck class="w-8 h-8" />
         </div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-          Join ChatBox
+          Register New User
         </h1>
-        <p class="text-xs text-gray-400 mt-1">Create your personal messaging account</p>
+        <p class="text-xs text-gray-400 mt-1">Admin Console: Create user account</p>
       </div>
 
       <!-- Error Alert -->
@@ -143,21 +156,40 @@ async function handleRegister() {
           </div>
         </div>
 
+        <!-- Role: Is Admin checkbox -->
+        <div class="flex items-center gap-2 pt-1">
+          <input
+            id="isAdminCheck"
+            v-model="isUserAdmin"
+            type="checkbox"
+            class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer"
+          />
+          <label for="isAdminCheck" class="text-xs text-gray-700 dark:text-gray-300 font-medium cursor-pointer">
+            Grant Administrator Privileges (Admin Role)
+          </label>
+        </div>
+
         <button
           type="submit"
           :disabled="isLoading"
-          class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 mt-3"
+          class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 mt-3 cursor-pointer"
         >
           <Loader2 v-if="isLoading" class="w-4 h-4 animate-spin" />
-          <span>Create Account</span>
+          <span>Register User Account</span>
         </button>
       </form>
 
-      <!-- Login Link -->
+      <!-- Success Alert -->
+      <div v-if="successMessage" class="mt-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs flex items-center gap-2">
+        <ShieldCheck class="w-4 h-4 flex-shrink-0" />
+        <span>{{ successMessage }}</span>
+      </div>
+
+      <!-- Back to Chat Link -->
       <div class="text-center mt-6 text-xs text-gray-500">
-        Already have an account?
-        <router-link to="/login" class="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline ml-1">
-          Sign In
+        <router-link to="/" class="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
+          <ArrowLeft class="w-3.5 h-3.5" />
+          <span>Return to Chat</span>
         </router-link>
       </div>
     </div>

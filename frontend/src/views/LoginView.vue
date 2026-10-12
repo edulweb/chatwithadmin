@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { MessageCircle, Lock, Mail, Loader2, AlertCircle } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/authStore'
@@ -12,6 +12,14 @@ const password = ref('')
 const errorMessage = ref(null)
 const isLoading = ref(false)
 
+onMounted(() => {
+  const notice = sessionStorage.getItem('auth_notice')
+  if (notice) {
+    errorMessage.value = notice
+    sessionStorage.removeItem('auth_notice')
+  }
+})
+
 async function handleLogin() {
   errorMessage.value = null
   isLoading.value = true
@@ -22,7 +30,7 @@ async function handleLogin() {
     })
     router.push('/')
   } catch (err) {
-    errorMessage.value = err.response?.data?.message || err.response?.data?.errors?.login?.[0] || 'Login failed'
+    errorMessage.value = err.response?.data?.errors?.login?.[0] || err.response?.data?.message || 'Login failed'
   } finally {
     isLoading.value = false
   }
@@ -91,19 +99,41 @@ function fillDemo(email) {
         <button
           type="submit"
           :disabled="isLoading"
-          class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 mt-2"
+          class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 mt-2 cursor-pointer"
         >
           <Loader2 v-if="isLoading" class="w-4 h-4 animate-spin" />
           <span>Sign In</span>
         </button>
       </form>
 
-      <!-- Register Link -->
-      <div class="text-center mt-6 text-xs text-gray-500">
-        Don't have an account?
-        <router-link to="/register" class="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline ml-1">
-          Create account
-        </router-link>
+      <!-- Quick Demo Logins -->
+      <div class="mt-6 pt-5 border-t border-gray-100 dark:border-gray-800">
+        <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-center mb-2.5">
+          Quick Demo Accounts
+        </p>
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            class="px-2.5 py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-900 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 text-[11px] font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors flex flex-col items-center cursor-pointer"
+            @click="fillDemo('alex@chatbox.test')"
+          >
+            <span class="font-bold">Alex (Admin)</span>
+            <span class="text-[10px] opacity-75">alex@chatbox.test</span>
+          </button>
+          <button
+            type="button"
+            class="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 text-[11px] font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex flex-col items-center cursor-pointer"
+            @click="fillDemo('sarah@chatbox.test')"
+          >
+            <span class="font-bold">Sarah (User)</span>
+            <span class="text-[10px] opacity-75">sarah@chatbox.test</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Registration Info -->
+      <div class="text-center mt-5 text-xs text-gray-400">
+        Account registration is managed by system administrators.
       </div>
     </div>
   </div>

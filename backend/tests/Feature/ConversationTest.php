@@ -15,7 +15,7 @@ class ConversationTest extends TestCase
 
     public function test_user_can_create_direct_conversation(): void
     {
-        $user1 = User::factory()->create(['username' => 'user1']);
+        $user1 = User::factory()->create(['username' => 'user1', 'is_admin' => true]);
         $user2 = User::factory()->create(['username' => 'user2']);
 
         $response = $this->actingAs($user1)->postJson('/api/v1/conversations', [
@@ -38,7 +38,7 @@ class ConversationTest extends TestCase
 
     public function test_duplicate_direct_conversation_returns_existing(): void
     {
-        $user1 = User::factory()->create(['username' => 'user1']);
+        $user1 = User::factory()->create(['username' => 'user1', 'is_admin' => true]);
         $user2 = User::factory()->create(['username' => 'user2']);
 
         // First creation

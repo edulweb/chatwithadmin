@@ -7,11 +7,13 @@ import {
   Moon,
   Sun,
   X,
-  MessageCircle
+  MessageCircle,
+  UserPlus
 } from 'lucide-vue-next'
 import UserAvatar from './UserAvatar.vue'
 import ConversationList from './ConversationList.vue'
 import UserSearch from './UserSearch.vue'
+import AdminUserModal from './AdminUserModal.vue'
 import ProfilePanel from './ProfilePanel.vue'
 import SettingsPanel from './SettingsPanel.vue'
 import { useAuthStore } from '@/stores/authStore'
@@ -22,6 +24,7 @@ const settingsStore = useSettingsStore()
 
 const searchQuery = ref('')
 const showUserSearch = ref(false)
+const showAdminRegister = ref(false)
 const showProfile = ref(false)
 const showSettings = ref(false)
 
@@ -48,11 +51,22 @@ function clearSearch() {
 
       <!-- Action buttons -->
       <div class="flex items-center gap-1">
+        <!-- Admin: Register User -->
+        <button
+          v-if="authStore.isAdmin"
+          type="button"
+          class="p-2 rounded-xl text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+          title="Register new user"
+          @click="showAdminRegister = true"
+        >
+          <UserPlus class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+        </button>
+
         <!-- New Chat -->
         <button
           type="button"
-          class="p-2 rounded-xl text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          title="New conversation"
+          class="p-2 rounded-xl text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+          :title="authStore.isAdmin ? 'New conversation' : 'Contact Administrator'"
           @click="showUserSearch = true"
         >
           <MessageSquarePlus class="w-4 h-4" />
@@ -95,9 +109,17 @@ function clearSearch() {
           :show-status="true"
         />
         <div class="min-w-0">
-          <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
-            {{ authStore.user?.name || 'My Profile' }}
-          </p>
+          <div class="flex items-center gap-1.5">
+            <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
+              {{ authStore.user?.name || 'My Profile' }}
+            </p>
+            <span
+              v-if="authStore.isAdmin"
+              class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
+            >
+              Admin
+            </span>
+          </div>
           <p class="text-[11px] text-gray-400 truncate">
             @{{ authStore.user?.username }}
           </p>
@@ -137,6 +159,7 @@ function clearSearch() {
 
     <!-- Modals -->
     <UserSearch v-if="showUserSearch" @close="showUserSearch = false" />
+    <AdminUserModal v-if="showAdminRegister" @close="showAdminRegister = false" />
     <ProfilePanel v-if="showProfile" @close="showProfile = false" />
     <SettingsPanel v-if="showSettings" @close="showSettings = false" />
   </aside>

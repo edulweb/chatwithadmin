@@ -28,6 +28,8 @@ class User extends Authenticatable
         'password',
         'avatar_path',
         'last_seen_at',
+        'is_admin',
+        'is_disabled',
     ];
 
     /**
@@ -51,7 +53,19 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'last_seen_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
+            'is_disabled' => 'boolean',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
+    }
+
+    public function isDisabled(): bool
+    {
+        return (bool) $this->is_disabled;
     }
 
     /**

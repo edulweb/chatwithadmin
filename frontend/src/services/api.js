@@ -19,11 +19,16 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem('chatbox_token')
-      localStorage.removeItem('chatbox_user')
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-        window.location.href = '/login'
+    if (error.response) {
+      if (error.response.status === 401 || (error.response.status === 403 && error.response.data?.account_disabled)) {
+        localStorage.removeItem('chatbox_token')
+        localStorage.removeItem('chatbox_user')
+        if (error.response.data?.account_disabled) {
+          sessionStorage.setItem('auth_notice', error.response.data.message || 'Your account has been disabled by an administrator.')
+        }
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+          window.location.href = '/login'
+        }
       }
     }
     return Promise.reject(error)

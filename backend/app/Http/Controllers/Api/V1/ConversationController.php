@@ -26,19 +26,29 @@ class ConversationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $userId = $request->user()->id;
+        $currentUser = $request->user();
+        $userId = $currentUser->id;
 
-        $conversations = Conversation::whereHas('conversationMembers', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })
-        ->with([
-            'members',
-            'conversationMembers',
-            'latestMessage.sender',
-            'latestMessage.attachments',
-        ])
-        ->orderByDesc('updated_at')
-        ->get();
+        $query = Conversation::whereHas('conversationMembers', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        });
+
+        // Non-admin users can only view conversations with an administrator
+        if (!$currentUser->isAdmin()) {
+            $query->whereHas('members', function ($q) {
+                $q->where('is_admin', true);
+            });
+        }
+
+        $conversations = $query
+            ->with([
+                'members',
+                'conversationMembers',
+                'latestMessage.sender',
+                'latestMessage.attachments',
+            ])
+            ->orderByDesc('updated_at')
+            ->get();
 
         return response()->json([
             'data' => ConversationResource::collection($conversations),
@@ -48,14 +58,22 @@ class ConversationController extends Controller
 
     public function store(CreateConversationRequest $request): JsonResponse
     {
-        $currentUserId = $request->user()->id;
+        $currentUser = $request->user();
+        $currentUserId = $currentUser->id;
         $targetUserId = (int) $request->user_id;
 
         // Verify target user exists
         $targetUser = User::findOrFail($targetUserId);
 
+        // Check if regular user is attempting to chat with a non-admin
+        if (!$currentUser->isAdmin() && !$targetUser->isAdmin()) {
+            return response()->json([
+                'message' => 'Regular users are only permitted to chat with administrators.',
+            ], 403);
+        }
+
         // Check if either user has blocked the other
-        if ($request->user()->hasBlocked($targetUserId) || $targetUser->hasBlocked($currentUserId)) {
+        if ($currentUser->hasBlocked($targetUserId) || $targetUser->hasBlocked($currentUserId)) {
             return response()->json([
                 'message' => 'Cannot create conversation due to user block settings.',
             ], 403);

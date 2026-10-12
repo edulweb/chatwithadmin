@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, nextTick, computed } from 'vue'
-import { Send, X, FileUp, Film, Music, Image as ImageIcon, FileText, File } from 'lucide-vue-next'
+import { Send, X, FileUp, Film, Music, Image as ImageIcon, FileText, File, AlertCircle } from 'lucide-vue-next'
 import AttachmentButton from './AttachmentButton.vue'
 import UploadProgress from './UploadProgress.vue'
 import { useChatStore } from '@/stores/chatStore'
@@ -12,6 +12,7 @@ const selectedFile = ref(null)
 const textareaRef = ref(null)
 const isSubmitting = ref(false)
 const isDragging = ref(false)
+const composerError = ref(null)
 
 const fileCategoryIcon = computed(() => {
   if (!selectedFile.value) return FileUp
@@ -35,8 +36,9 @@ const formattedSelectedSize = computed(() => {
 
 function onFileSelected(file) {
   if (!file) return
+  composerError.value = null
   if (file.size > 100 * 1024 * 1024) {
-    alert('File size exceeds the 100 MiB limit.')
+    composerError.value = 'File size exceeds the 100 MiB limit.'
     return
   }
   selectedFile.value = file
@@ -44,6 +46,7 @@ function onFileSelected(file) {
 
 function removeSelectedFile() {
   selectedFile.value = null
+  composerError.value = null
 }
 
 function cancelReply() {
@@ -51,6 +54,7 @@ function cancelReply() {
 }
 
 function onInput() {
+  composerError.value = null
   chatStore.sendTyping(true)
   adjustTextareaHeight()
 }
@@ -112,6 +116,7 @@ async function handleSubmit() {
   if (!body && !file) return
   if (isSubmitting.value) return
 
+  composerError.value = null
   isSubmitting.value = true
   try {
     await chatStore.sendMessage({
@@ -125,7 +130,7 @@ async function handleSubmit() {
     chatStore.sendTyping(false)
     adjustTextareaHeight()
   } catch (err) {
-    // Error handled in store/upload progress
+    composerError.value = chatStore.uploadError || err.response?.data?.message || 'Failed to send video / message.'
   } finally {
     isSubmitting.value = false
   }
@@ -140,6 +145,25 @@ async function handleSubmit() {
     @dragleave="handleDragLeave"
     @drop="handleDrop"
   >
+    <!-- Upload / Send Error Alert Banner -->
+    <div
+      v-if="composerError"
+      class="flex items-center justify-between px-4 py-2.5 bg-rose-50 dark:bg-rose-950/60 border-b border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 transition-all select-none"
+    >
+      <div class="flex items-center gap-2 pr-2">
+        <AlertCircle class="w-4 h-4 flex-shrink-0 text-rose-500" />
+        <span class="font-medium">{{ composerError }}</span>
+      </div>
+      <button
+        type="button"
+        class="text-rose-400 hover:text-rose-600 dark:hover:text-rose-200 p-0.5 cursor-pointer rounded"
+        title="Dismiss"
+        @click="composerError = null"
+      >
+        <X class="w-3.5 h-3.5" />
+      </button>
+    </div>
+
     <!-- Drag & Drop Overlay Indicator -->
     <div
       v-if="isDragging"

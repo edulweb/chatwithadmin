@@ -33,6 +33,15 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('chatbox_token')
+  const rawUser = localStorage.getItem('chatbox_user')
+  const user = rawUser ? JSON.parse(rawUser) : null
+
+  if (to.name === 'register') {
+    if (!token || !user?.is_admin) {
+      return next({ name: 'login' })
+    }
+    return next()
+  }
 
   if (to.meta.requiresAuth && !token) {
     next({ name: 'login' })

@@ -204,7 +204,16 @@ export const useChatStore = defineStore('chat', () => {
       replyingToMessage.value = null
       return newMsg
     } catch (err) {
-      uploadError.value = err.response?.data?.message || 'Failed to send message'
+      if (err.response?.status === 413) {
+        uploadError.value = 'The video/file is too large for the server. Maximum limit is 100MB.'
+      } else if (err.response?.data?.errors?.file?.[0]) {
+        uploadError.value = err.response.data.errors.file[0]
+      } else if (err.response?.data?.message) {
+        uploadError.value = err.response.data.message
+      } else {
+        uploadError.value = 'Failed to upload video or send message. Please try again.'
+      }
+      console.error('Send message / upload failed:', err)
       throw err
     } finally {
       isUploading.value = false
@@ -387,6 +396,15 @@ export const useChatStore = defineStore('chat', () => {
         console.error('Echo presence error:', err)
         connectionStatus.value = 'disconnected'
       })
+
+    // Listen to user-specific private channel for instant events (e.g. account disabled)
+    if (authStore.user?.id) {
+      echo.private(`user.${authStore.user.id}`)
+        .listen('UserDisabled', (e) => {
+          console.warn('Received UserDisabled event:', e)
+          authStore.forceLogoutDisabled(e.reason || 'Your account has been disabled by an administrator.')
+        })
+    }
 
     // Listen to window focus or reconnect
     window.addEventListener('focus', () => {

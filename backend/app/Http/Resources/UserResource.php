@@ -14,7 +14,7 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $isSelf = ($request->user() && $request->user()->id === $this->id)
+        $isSelfOrAdmin = ($request->user() && ($request->user()->id === $this->id || $request->user()->isAdmin()))
             || $request->is('*auth/register')
             || $request->is('*auth/login');
 
@@ -27,8 +27,10 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'username' => $this->username,
-            'email' => $this->when($isSelf, $this->email),
+            'email' => $this->when($isSelfOrAdmin, $this->email),
             'avatar_url' => $this->avatar_url,
+            'is_admin' => (bool) $this->is_admin,
+            'is_disabled' => (bool) $this->is_disabled,
             'last_seen_at' => $this->last_seen_at?->toISOString(),
             'is_online' => $isOnline,
             'created_at' => $this->created_at?->toISOString(),

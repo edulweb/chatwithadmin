@@ -20,23 +20,9 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $request): JsonResponse
     {
-        $user = User::create([
-            'name' => $request->name,
-            'username' => strtolower($request->username),
-            'email' => strtolower($request->email),
-            'password' => Hash::make($request->password),
-            'last_seen_at' => now(),
-        ]);
-
-        $token = $user->createToken('chatbox_token')->plainTextToken;
-
         return response()->json([
-            'message' => 'Registration successful',
-            'data' => [
-                'user' => new UserResource($user),
-                'token' => $token,
-            ],
-        ], 201);
+            'message' => 'Public registration is disabled. Only administrators can register users.',
+        ], 403);
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -60,6 +46,13 @@ class AuthController extends Controller
             throw ValidationException::withMessages([
                 'login' => ['These credentials do not match our records.'],
             ]);
+        }
+
+        if ($user->isDisabled()) {
+            RateLimiter::hit($throttleKey, 60);
+            throw ValidationException::withMessages([
+                'login' => ['Your account has been disabled by an administrator. Please contact support.'],
+            ])->status(403);
         }
 
         RateLimiter::clear($throttleKey);

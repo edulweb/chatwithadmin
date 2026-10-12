@@ -11,9 +11,11 @@ class AuthTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_user_can_register(): void
+    public function test_user_can_register_via_admin(): void
     {
-        $response = $this->postJson('/api/v1/auth/register', [
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $response = $this->actingAs($admin)->postJson('/api/v1/admin/users', [
             'name' => 'Alice Wonder',
             'username' => 'alice',
             'email' => 'alice@example.com',
@@ -25,8 +27,7 @@ class AuthTest extends TestCase
             ->assertJsonStructure([
                 'message',
                 'data' => [
-                    'user' => ['id', 'name', 'username', 'email'],
-                    'token',
+                    'id', 'name', 'username', 'email', 'is_admin',
                 ],
             ]);
 
@@ -38,12 +39,14 @@ class AuthTest extends TestCase
 
     public function test_registration_validation_fails_on_duplicate_username(): void
     {
+        $admin = User::factory()->create(['is_admin' => true]);
+
         User::factory()->create([
             'username' => 'existinguser',
             'email' => 'other@example.com',
         ]);
 
-        $response = $this->postJson('/api/v1/auth/register', [
+        $response = $this->actingAs($admin)->postJson('/api/v1/admin/users', [
             'name' => 'Another User',
             'username' => 'existinguser',
             'email' => 'new@example.com',

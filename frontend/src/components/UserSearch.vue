@@ -1,17 +1,23 @@
 <script setup>
-import { ref } from 'vue'
-import { Search, X, UserPlus, Loader2 } from 'lucide-vue-next'
+import { ref, onMounted } from 'vue'
+import { Search, X, UserPlus, Loader2, ShieldCheck } from 'lucide-vue-next'
 import UserAvatar from './UserAvatar.vue'
 import { useUserStore } from '@/stores/userStore'
 import { useChatStore } from '@/stores/chatStore'
+import { useAuthStore } from '@/stores/authStore'
 
 const emit = defineEmits(['close'])
 
+const authStore = useAuthStore()
 const userStore = useUserStore()
 const chatStore = useChatStore()
 
 const query = ref('')
 let debounceTimer = null
+
+onMounted(() => {
+  userStore.searchUsers('')
+})
 
 function handleInput() {
   if (debounceTimer) clearTimeout(debounceTimer)
@@ -36,12 +42,13 @@ async function selectUser(user) {
       <!-- Header -->
       <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
         <h3 class="font-semibold text-sm text-gray-900 dark:text-gray-100 flex items-center gap-2">
-          <UserPlus class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-          <span>New Conversation</span>
+          <ShieldCheck v-if="!authStore.isAdmin" class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+          <UserPlus v-else class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+          <span>{{ authStore.isAdmin ? 'New Conversation' : 'Contact Administrator' }}</span>
         </h3>
         <button
           type="button"
-          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg"
+          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg cursor-pointer"
           @click="emit('close')"
         >
           <X class="w-4 h-4" />
@@ -55,7 +62,7 @@ async function selectUser(user) {
           <input
             v-model="query"
             type="text"
-            placeholder="Search by name or username..."
+            :placeholder="authStore.isAdmin ? 'Search by name or username...' : 'Search administrators...'"
             class="w-full bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none"
             autofocus
             @input="handleInput"
@@ -67,21 +74,21 @@ async function selectUser(user) {
       <div class="flex-1 overflow-y-auto p-2 space-y-1">
         <div v-if="userStore.isSearching" class="p-8 text-center text-xs text-gray-400 flex items-center justify-center gap-2">
           <Loader2 class="w-4 h-4 animate-spin text-indigo-600" />
-          <span>Searching users...</span>
+          <span>Searching contacts...</span>
         </div>
 
         <div
           v-else-if="query.trim() && userStore.searchResults.length === 0"
           class="p-8 text-center text-xs text-gray-400"
         >
-          No users found matching "{{ query }}"
+          No {{ authStore.isAdmin ? 'users' : 'administrators' }} found matching "{{ query }}"
         </div>
 
         <div
-          v-else-if="!query.trim()"
+          v-else-if="!query.trim() && userStore.searchResults.length === 0"
           class="p-8 text-center text-xs text-gray-400"
         >
-          Type a name or @username to find contacts.
+          {{ authStore.isAdmin ? 'No other users found.' : 'No administrators are currently available.' }}
         </div>
 
         <div
@@ -92,16 +99,30 @@ async function selectUser(user) {
         >
           <UserAvatar :user="user" size="md" />
           <div class="flex-1 min-w-0">
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-              {{ user.name }}
-            </h4>
+            <div class="flex items-center gap-2">
+              <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                {{ user.name }}
+              </h4>
+              <span
+                v-if="user.is_admin"
+                class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
+              >
+                Admin
+              </span>
+              <span
+                v-if="user.is_disabled"
+                class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+              >
+                Disabled
+              </span>
+            </div>
             <p class="text-xs text-gray-400 truncate">
               @{{ user.username }}
             </p>
           </div>
           <button
             type="button"
-            class="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:bg-indigo-100 transition-colors"
+            class="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors cursor-pointer"
           >
             Chat
           </button>
