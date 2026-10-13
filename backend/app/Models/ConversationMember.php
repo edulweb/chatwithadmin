@@ -15,6 +15,8 @@ class ConversationMember extends Model
         'user_id',
         'joined_at',
         'last_read_message_id',
+        'cleared_at',
+        'cleared_message_id',
         'muted_at',
     ];
 
@@ -22,6 +24,8 @@ class ConversationMember extends Model
     {
         return [
             'joined_at' => 'datetime',
+            'cleared_at' => 'datetime',
+            'cleared_message_id' => 'integer',
             'muted_at' => 'datetime',
         ];
     }

@@ -46,6 +46,9 @@
 
     # Permissions policy
     Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+
+    # Block search engine indexing and caching across all responses
+    Header always set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet, noimageindex"
 </IfModule>
 
 # ==============================================================================

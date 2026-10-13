@@ -37,15 +37,15 @@ class MessageResource extends JsonResource
             'sender_id' => $this->sender_id,
             'sender' => new UserResource($this->whenLoaded('sender')),
             'type' => $this->type,
-            'body' => $isDeleted ? 'This message was deleted' : $this->body,
+            'body' => $isDeleted ? null : $this->body,
             'reply_to_id' => $this->reply_to_id,
-            'reply_to' => $this->when($this->reply_to_id && $this->relationLoaded('replyTo') && $this->replyTo, function () {
+            'reply_to' => $this->when($this->reply_to_id && $this->relationLoaded('replyTo') && $this->replyTo && !$this->replyTo->deleted_at, function () {
                 $rt = $this->replyTo;
                 return [
                     'id' => $rt->id,
                     'sender_id' => $rt->sender_id,
                     'sender_name' => $rt->sender?->name ?? 'User',
-                    'body' => $rt->deleted_at ? 'This message was deleted' : $rt->body,
+                    'body' => $rt->body,
                     'type' => $rt->type,
                 ];
             }),

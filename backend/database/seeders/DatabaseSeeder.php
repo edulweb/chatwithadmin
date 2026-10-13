@@ -42,19 +42,6 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $david = User::updateOrCreate(
-            ['email' => 'david@chatbox.test'],
-            [
-                'name' => 'David Kim',
-                'username' => 'david',
-                'password' => Hash::make('password123'),
-                'is_admin' => false,
-                'is_active' => true,
-                'email_verified_at' => now(),
-                'last_seen_at' => now()->subHours(2),
-            ]
-        );
-
         // Demo direct conversation between Alex and Sarah
         $pair = Conversation::makeCanonicalPair($alex->id, $sarah->id);
         $conv = Conversation::firstOrCreate(
@@ -80,7 +67,7 @@ class DatabaseSeeder extends Seeder
                 'conversation_id' => $conv->id,
                 'sender_id' => $alex->id,
                 'type' => 'text',
-                'body' => 'Hey Sarah! Welcome to ChatBox. 🚀',
+                'body' => 'Hey Sarah! Welcome to Connectly. 🚀',
                 'created_at' => now()->subMinutes(10),
             ]);
 

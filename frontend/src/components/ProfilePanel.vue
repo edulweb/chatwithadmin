@@ -280,7 +280,7 @@ async function handleLogout() {
             @click="handleLogout"
           >
             <LogOut class="w-4 h-4" />
-            <span>Log Out of ChatBox</span>
+            <span>Log Out of connectly</span>
           </button>
         </div>
       </div>

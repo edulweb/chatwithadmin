@@ -84,13 +84,13 @@ function fillDemo(email) {
 <template>
   <div class="min-h-screen w-full flex items-center justify-center p-4 bg-slate-50 dark:bg-gray-950 font-sans select-none">
     <div class="w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 p-8 sm:p-10">
-      <!-- ChatBox Logo -->
+      <!-- connectly Logo -->
       <div class="flex flex-col items-center text-center mb-8">
         <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 mb-3">
           <MessageCircle class="w-8 h-8 fill-current" />
         </div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-          {{ mode === 'login' ? 'ChatBox' : 'Reset Password' }}
+          {{ mode === 'login' ? 'connectly' : 'Reset Password' }}
         </h1>
         <p class="text-xs text-gray-400 mt-1">
           {{ mode === 'login' ? 'Sign in to your personal messaging account' : 'Enter your email to receive a password reset link' }}
@@ -208,36 +208,6 @@ function fillDemo(email) {
           </button>
         </div>
       </form>
-
-      <!-- Quick Demo Logins -->
-      <div v-if="mode === 'login'" class="mt-6 pt-5 border-t border-gray-100 dark:border-gray-800">
-        <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-center mb-2.5">
-          Quick Demo Accounts
-        </p>
-        <div class="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            class="px-2.5 py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-900 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 text-[11px] font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors flex flex-col items-center cursor-pointer"
-            @click="fillDemo('alex@chatbox.test')"
-          >
-            <span class="font-bold">Alex (Admin)</span>
-            <span class="text-[10px] opacity-75">alex@chatbox.test</span>
-          </button>
-          <button
-            type="button"
-            class="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 text-[11px] font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex flex-col items-center cursor-pointer"
-            @click="fillDemo('sarah@chatbox.test')"
-          >
-            <span class="font-bold">Sarah (User)</span>
-            <span class="text-[10px] opacity-75">sarah@chatbox.test</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Registration Info -->
-      <div class="text-center mt-5 text-xs text-gray-400">
-        Account registration is managed by system administrators.
-      </div>
     </div>
   </div>
 </template>

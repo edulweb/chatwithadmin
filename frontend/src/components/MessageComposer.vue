@@ -55,7 +55,11 @@ function cancelReply() {
 
 function onInput() {
   composerError.value = null
-  chatStore.sendTyping(true)
+  if (text.value && text.value.trim().length > 0) {
+    chatStore.sendTyping(true)
+  } else {
+    chatStore.sendTyping(false)
+  }
   adjustTextareaHeight()
 }
 

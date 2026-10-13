@@ -141,11 +141,10 @@ class MessageTest extends TestCase
 
         $this->assertSoftDeleted('messages', ['id' => $msg->id]);
 
-        // Message should return "This message was deleted"
+        // Deleted message should NOT show "This message was deleted", it is cleared/excluded
         $getRes = $this->actingAs($user2)->getJson("/api/v1/conversations/{$conv->id}/messages");
         $getRes->assertStatus(200)
-            ->assertJsonPath('data.0.body', 'This message was deleted')
-            ->assertJsonPath('data.0.is_deleted', true);
+            ->assertJsonCount(0, 'data');
     }
 
     public function test_member_can_mark_messages_as_read(): void

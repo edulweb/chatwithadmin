@@ -16,8 +16,15 @@
     RewriteRule ^(backend/(app|bootstrap|config|database|resources|routes|storage/framework|tests|vendor)) - [F,L,NC]
     RewriteRule ^(frontend/(src|node_modules)) - [F,L,NC]
 
-    # Rewrite all traffic to backend/public directory
-    RewriteCond %{REQUEST_URI} !^/backend/public/
+    # Handle Authorization & XSRF Headers across internal rewrites
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # Rewrite all traffic to backend/public directory (supports root & subfolder deployments)
+    RewriteCond %{REQUEST_URI} !/backend/public/
     RewriteRule ^(.*)$ backend/public/$1 [L]
 </IfModule>
 
@@ -31,3 +38,8 @@
         Deny from all
     </IfModule>
 </FilesMatch>
+
+# Block search engines from crawling or indexing
+<IfModule mod_headers.c>
+    Header always set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet, noimageindex"
+</IfModule>

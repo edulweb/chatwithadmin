@@ -70,7 +70,7 @@ class AdminChatPermissionsTest extends TestCase
 
     public function test_non_admin_can_only_see_admins_in_user_list(): void
     {
-        $sarah = User::where('email', 'sarah@chatbox.test')->first();
+        $sarah = User::where('email', 'sarah@connectly.test')->first();
         Sanctum::actingAs($sarah);
 
         $response = $this->getJson('/api/v1/users');
@@ -85,7 +85,7 @@ class AdminChatPermissionsTest extends TestCase
 
     public function test_admin_can_see_all_users_in_user_list(): void
     {
-        $admin = User::where('email', 'alex@chatbox.test')->first();
+        $admin = User::where('email', 'alex@connectly.test')->first();
         Sanctum::actingAs($admin);
 
         $response = $this->getJson('/api/v1/users');
@@ -98,8 +98,8 @@ class AdminChatPermissionsTest extends TestCase
 
     public function test_non_admin_cannot_start_conversation_with_another_non_admin(): void
     {
-        $sarah = User::where('email', 'sarah@chatbox.test')->first();
-        $david = User::where('email', 'david@chatbox.test')->first();
+        $sarah = User::where('email', 'sarah@connectly.test')->first();
+        $david = User::where('email', 'david@connectly.test')->first();
 
         Sanctum::actingAs($sarah);
 
@@ -115,8 +115,8 @@ class AdminChatPermissionsTest extends TestCase
 
     public function test_non_admin_can_start_conversation_with_admin(): void
     {
-        $sarah = User::where('email', 'sarah@chatbox.test')->first();
-        $admin = User::where('email', 'alex@chatbox.test')->first();
+        $sarah = User::where('email', 'sarah@connectly.test')->first();
+        $admin = User::where('email', 'alex@connectly.test')->first();
 
         Sanctum::actingAs($sarah);
 
@@ -129,8 +129,8 @@ class AdminChatPermissionsTest extends TestCase
 
     public function test_admin_can_start_conversation_with_anyone(): void
     {
-        $admin = User::where('email', 'alex@chatbox.test')->first();
-        $david = User::where('email', 'david@chatbox.test')->first();
+        $admin = User::where('email', 'alex@connectly.test')->first();
+        $david = User::where('email', 'david@connectly.test')->first();
 
         Sanctum::actingAs($admin);
 

@@ -9,7 +9,7 @@ let cachedConfig = null
 
 // Try restoring cached configuration from localStorage
 try {
-  const stored = localStorage.getItem('chatbox_broadcast_config')
+  const stored = localStorage.getItem('connectly_broadcast_config')
   if (stored) {
     cachedConfig = JSON.parse(stored)
   }
@@ -32,7 +32,7 @@ export async function initBroadcasting() {
       cachedConfig = data
 
       try {
-        localStorage.setItem('chatbox_broadcast_config', JSON.stringify(data))
+        localStorage.setItem('connectly_broadcast_config', JSON.stringify(data))
       } catch (_) {}
 
       // If already connected with an older driver that changed, reconnect
@@ -52,7 +52,7 @@ export async function initBroadcasting() {
  * Return current active Echo instance (or instantiate dynamically based on current broadcaster mode).
  */
 export function getEcho() {
-  const token = localStorage.getItem('chatbox_token')
+  const token = localStorage.getItem('connectly_token')
   if (!token) {
     if (echoInstance) {
       disconnectEcho()

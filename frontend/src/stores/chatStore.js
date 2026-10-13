@@ -33,6 +33,8 @@ export const useChatStore = defineStore('chat', () => {
   let activeEchoChannel = null
   let presenceChannel = null
   let typingTimeout = null
+  let lastTypingSentTime = 0
+  let isCurrentlyTyping = false
 
   // Total unread count
   const totalUnreadCount = computed(() => {
@@ -243,14 +245,31 @@ export const useChatStore = defineStore('chat', () => {
     try {
       await api.delete(`/messages/${messageId}`)
 
-      const idx = messages.value.findIndex((m) => m.id === messageId)
-      if (idx !== -1) {
-        messages.value[idx].body = 'This message was deleted'
-        messages.value[idx].is_deleted = true
-        messages.value[idx].attachments = []
+      messages.value = messages.value.filter((m) => m.id !== messageId)
+
+      if (activeConversation.value) {
+        const lastRemaining = messages.value[messages.value.length - 1] || null
+        updateConversationLatestMessage(activeConversation.value.id, lastRemaining)
       }
     } catch (err) {
       console.error('Failed to delete message:', err)
+      throw err
+    }
+  }
+
+  async function clearChat(conversationId) {
+    try {
+      await api.post(`/conversations/${conversationId}/clear`)
+
+      if (activeConversation.value && activeConversation.value.id === conversationId) {
+        messages.value = []
+        oldestMessageId.value = null
+        newestMessageId.value = null
+        hasMoreMessages.value = false
+        updateConversationLatestMessage(conversationId, null)
+      }
+    } catch (err) {
+      console.error('Failed to clear chat:', err)
       throw err
     }
   }
@@ -272,16 +291,34 @@ export const useChatStore = defineStore('chat', () => {
   function sendTyping(isTyping = true) {
     if (!activeConversation.value) return
 
-    // Debounce typing broadcast
-    if (typingTimeout) clearTimeout(typingTimeout)
-
-    api.post(`/conversations/${activeConversation.value.id}/typing`, { is_typing: isTyping }).catch(() => {})
-
-    if (isTyping) {
-      typingTimeout = setTimeout(() => {
-        sendTyping(false)
-      }, 3000)
+    if (!isTyping) {
+      if (typingTimeout) {
+        clearTimeout(typingTimeout)
+        typingTimeout = null
+      }
+      lastTypingSentTime = 0
+      if (isCurrentlyTyping) {
+        isCurrentlyTyping = false
+        api.post(`/conversations/${activeConversation.value.id}/typing`, { is_typing: false }).catch(() => {})
+      }
+      return
     }
+
+    const now = Date.now()
+    const throttleInterval = 7000 // 7 seconds
+
+    // If continuous typing, send at most once every 3 seconds
+    if (now - lastTypingSentTime >= throttleInterval) {
+      lastTypingSentTime = now
+      isCurrentlyTyping = true
+      api.post(`/conversations/${activeConversation.value.id}/typing`, { is_typing: true }).catch(() => {})
+    }
+
+    // Reset inactivity timer: after 3 seconds of no typing, notify server that typing stopped
+    if (typingTimeout) clearTimeout(typingTimeout)
+    typingTimeout = setTimeout(() => {
+      sendTyping(false)
+    }, throttleInterval)
   }
 
   function subscribeToConversation(conversationId) {
@@ -327,11 +364,14 @@ export const useChatStore = defineStore('chat', () => {
       })
       .listen('MessageDeleted', (e) => {
         if (activeConversation.value && activeConversation.value.id === conversationId) {
-          const idx = messages.value.findIndex((m) => m.id === e.message_id)
-          if (idx !== -1) {
-            messages.value[idx].body = 'This message was deleted'
-            messages.value[idx].is_deleted = true
-            messages.value[idx].attachments = []
+          messages.value = messages.value.filter((m) => m.id !== e.message_id)
+
+          const lastRemaining = messages.value[messages.value.length - 1] || null
+          updateConversationLatestMessage(activeConversation.value.id, lastRemaining)
+        } else {
+          const conv = conversations.value.find((c) => c.id === e.conversation_id)
+          if (conv && conv.latest_message?.id === e.message_id) {
+            fetchConversations()
           }
         }
       })
@@ -367,6 +407,17 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   function unsubscribeFromConversation() {
+    if (isCurrentlyTyping && activeConversation.value) {
+      sendTyping(false)
+    } else {
+      if (typingTimeout) {
+        clearTimeout(typingTimeout)
+        typingTimeout = null
+      }
+      lastTypingSentTime = 0
+      isCurrentlyTyping = false
+    }
+
     if (activeConversation.value && activeEchoChannel) {
       const echo = getEcho()
       if (echo) {
@@ -417,9 +468,11 @@ export const useChatStore = defineStore('chat', () => {
     const conv = conversations.value.find((c) => c.id === convId)
     if (conv) {
       conv.latest_message = message
-      conv.updated_at = message.created_at
-      if (incrementUnread && activeConversation.value?.id !== convId && message.sender_id !== authStore.user?.id) {
-        conv.unread_count = (conv.unread_count || 0) + 1
+      if (message) {
+        conv.updated_at = message.created_at
+        if (incrementUnread && activeConversation.value?.id !== convId && message.sender_id !== authStore.user?.id) {
+          conv.unread_count = (conv.unread_count || 0) + 1
+        }
       }
       // Re-sort conversations
       conversations.value.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
@@ -457,6 +510,7 @@ export const useChatStore = defineStore('chat', () => {
     sendMessage,
     editMessage,
     deleteMessage,
+    clearChat,
     markAsRead,
     sendTyping,
     initGlobalPresence,

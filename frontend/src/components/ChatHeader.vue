@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Search, MoreVertical, ShieldAlert, ShieldCheck, UserX, UserCheck, X, Moon, Sun } from 'lucide-vue-next'
+import { Search, MoreVertical, ShieldAlert, ShieldCheck, UserX, UserCheck, X, Moon, Sun, Trash2 } from 'lucide-vue-next'
 import UserAvatar from './UserAvatar.vue'
 import { useChatStore } from '@/stores/chatStore'
 import { useUserStore } from '@/stores/userStore'
@@ -97,6 +97,17 @@ async function handleEnableUser() {
     alert(e.response?.data?.message || 'Failed to enable user account.')
   }
 }
+
+async function handleClearChat() {
+  if (!chatStore.activeConversation) return
+  if (!confirm('Are you sure you want to clear this chat? This will remove all messages from your side.')) return
+  try {
+    await chatStore.clearChat(chatStore.activeConversation.id)
+    showMenu.value = false
+  } catch (e) {
+    alert(e.response?.data?.message || 'Failed to clear chat.')
+  }
+}
 </script>
 
 <template>
@@ -164,7 +175,7 @@ async function handleEnableUser() {
       </button>
 
       <!-- Dropdown menu -->
-      <div class="relative" v-if="authStore.isAdmin || (!otherUser?.is_admin)">
+      <div class="relative">
         <button
           type="button"
           class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -174,13 +185,31 @@ async function handleEnableUser() {
           <MoreVertical class="w-4 h-4" />
         </button>
 
+        <!-- Dropdown backdrop for dismissal -->
+        <div
+          v-if="showMenu"
+          class="fixed inset-0 z-20"
+          @click="showMenu = false"
+        ></div>
+
         <div
           v-if="showMenu"
           class="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl py-1 z-30 select-none text-xs"
           @click="showMenu = false"
         >
+          <!-- Clear Chat from their side -->
+          <button
+            type="button"
+            class="w-full text-left px-3 py-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-2 cursor-pointer font-medium"
+            @click="handleClearChat"
+          >
+            <Trash2 class="w-4 h-4 text-rose-500" />
+            <span>Clear Chat</span>
+          </button>
+
           <!-- Admin Actions: Disable / Enable Account -->
           <template v-if="authStore.isAdmin && otherUser?.id !== authStore.user?.id">
+            <div class="my-1 border-t border-gray-100 dark:border-gray-700/60"></div>
             <button
               v-if="!otherUser?.is_disabled"
               type="button"
@@ -199,11 +228,11 @@ async function handleEnableUser() {
               <UserCheck class="w-4 h-4 text-emerald-500" />
               <span>Enable Account</span>
             </button>
-            <div v-if="!otherUser?.is_admin" class="my-1 border-t border-gray-100 dark:border-gray-700/60"></div>
           </template>
 
           <!-- Standard Block/Unblock (Never show for Admin targets) -->
           <template v-if="!otherUser?.is_admin">
+            <div class="my-1 border-t border-gray-100 dark:border-gray-700/60"></div>
             <button
               v-if="!chatStore.activeConversation?.has_blocked_other"
               type="button"

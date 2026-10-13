@@ -28,24 +28,34 @@ class ConversationResource extends JsonResource
             }
         }
 
-        // Calculate unread count for current user
+        // Calculate unread count and latest message for current user
         $unreadCount = 0;
+        $clearedId = 0;
         if ($user) {
             $currentMember = $this->conversationMembers?->firstWhere('user_id', $user->id);
             $lastReadId = $currentMember?->last_read_message_id ?? 0;
+            $clearedId = $currentMember?->cleared_message_id ?? 0;
+            $cutoffId = max($lastReadId, $clearedId);
 
             if ($this->relationLoaded('messages')) {
                 $unreadCount = $this->messages
                     ->where('sender_id', '!=', $user->id)
-                    ->where('id', '>', $lastReadId)
+                    ->where('id', '>', $cutoffId)
                     ->whereNull('deleted_at')
                     ->count();
             } else {
                 $unreadCount = $this->messages()
                     ->where('sender_id', '!=', $user->id)
-                    ->where('id', '>', $lastReadId)
+                    ->where('id', '>', $cutoffId)
                     ->whereNull('deleted_at')
                     ->count();
+            }
+        }
+
+        $latestMessage = null;
+        if ($this->relationLoaded('latestMessage') && $this->latestMessage) {
+            if (!$clearedId || $this->latestMessage->id > $clearedId) {
+                $latestMessage = new MessageResource($this->latestMessage);
             }
         }
 
@@ -55,7 +65,7 @@ class ConversationResource extends JsonResource
             'other_user' => $otherUser,
             'is_blocked' => $isBlocked,
             'has_blocked_other' => $hasBlockedOther,
-            'latest_message' => new MessageResource($this->whenLoaded('latestMessage')),
+            'latest_message' => $latestMessage,
             'unread_count' => $unreadCount,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),

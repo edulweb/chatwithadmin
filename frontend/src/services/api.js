@@ -9,7 +9,7 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('chatbox_token')
+  const token = localStorage.getItem('connectly_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -21,8 +21,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response) {
       if (error.response.status === 401 || (error.response.status === 403 && error.response.data?.account_disabled)) {
-        localStorage.removeItem('chatbox_token')
-        localStorage.removeItem('chatbox_user')
+        localStorage.removeItem('connectly_token')
+        localStorage.removeItem('connectly_user')
         if (error.response.data?.account_disabled) {
           sessionStorage.setItem('auth_notice', error.response.data.message || 'Your account has been disabled by an administrator.')
         }

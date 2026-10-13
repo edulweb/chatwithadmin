@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Ban, Check, X } from 'lucide-vue-next'
+import { Check, X } from 'lucide-vue-next'
 import UserAvatar from './UserAvatar.vue'
 import ReadReceipt from './ReadReceipt.vue'
 import ImagePreview from './ImagePreview.vue'
@@ -145,7 +145,6 @@ async function handleDelete() {
     >
       <MessageActions
         :is-sent-by-me="isSentByMe"
-        :is-deleted="message.is_deleted"
         @reply="handleReply"
         @copy="handleCopy"
         @edit="handleEdit"
@@ -209,60 +208,52 @@ async function handleDelete() {
 
       <!-- Normal Content -->
       <template v-else>
-        <!-- Soft deleted message -->
-        <div v-if="message.is_deleted" class="flex items-center gap-1.5 italic opacity-75 text-xs py-1">
-          <Ban class="w-3.5 h-3.5" />
-          <span>This message was deleted</span>
+        <!-- Image Attachments -->
+        <div v-if="images.length > 0" class="flex flex-col gap-2 mb-2">
+          <ImagePreview
+            v-for="img in images"
+            :key="img.id"
+            :attachment="img"
+          />
         </div>
 
-        <template v-else>
-          <!-- Image Attachments -->
-          <div v-if="images.length > 0" class="flex flex-col gap-2 mb-2">
-            <ImagePreview
-              v-for="img in images"
-              :key="img.id"
-              :attachment="img"
-            />
-          </div>
+        <!-- Video Attachments (Play & View) -->
+        <div v-if="videos.length > 0" class="flex flex-col gap-2 mb-2">
+          <VideoPlayer
+            v-for="vid in videos"
+            :key="vid.id"
+            :attachment="vid"
+            :is-sent-by-me="isSentByMe"
+          />
+        </div>
 
-          <!-- Video Attachments (Play & View) -->
-          <div v-if="videos.length > 0" class="flex flex-col gap-2 mb-2">
-            <VideoPlayer
-              v-for="vid in videos"
-              :key="vid.id"
-              :attachment="vid"
-              :is-sent-by-me="isSentByMe"
-            />
-          </div>
+        <!-- Audio Attachments (Play inline) -->
+        <div v-if="audios.length > 0" class="flex flex-col gap-2 mb-2">
+          <AudioPlayer
+            v-for="aud in audios"
+            :key="aud.id"
+            :attachment="aud"
+            :is-sent-by-me="isSentByMe"
+          />
+        </div>
 
-          <!-- Audio Attachments (Play inline) -->
-          <div v-if="audios.length > 0" class="flex flex-col gap-2 mb-2">
-            <AudioPlayer
-              v-for="aud in audios"
-              :key="aud.id"
-              :attachment="aud"
-              :is-sent-by-me="isSentByMe"
-            />
-          </div>
+        <!-- Document / File Attachments -->
+        <div v-if="documents.length > 0" class="flex flex-col gap-2 mb-2">
+          <FileAttachment
+            v-for="doc in documents"
+            :key="doc.id"
+            :attachment="doc"
+            :is-sent-by-me="isSentByMe"
+          />
+        </div>
 
-          <!-- Document / File Attachments -->
-          <div v-if="documents.length > 0" class="flex flex-col gap-2 mb-2">
-            <FileAttachment
-              v-for="doc in documents"
-              :key="doc.id"
-              :attachment="doc"
-              :is-sent-by-me="isSentByMe"
-            />
-          </div>
-
-          <!-- Message text body -->
-          <p
-            v-if="message.body"
-            class="text-sm leading-relaxed whitespace-pre-wrap break-words select-text"
-          >
-            {{ message.body }}
-          </p>
-        </template>
+        <!-- Message text body -->
+        <p
+          v-if="message.body"
+          class="text-sm leading-relaxed whitespace-pre-wrap break-words select-text"
+        >
+          {{ message.body }}
+        </p>
 
         <!-- Timestamp and status -->
         <div
@@ -271,11 +262,11 @@ async function handleDelete() {
             isSentByMe ? 'text-indigo-200' : 'text-gray-400 dark:text-gray-400'
           ]"
         >
-          <span v-if="message.edited_at && !message.is_deleted" class="text-[10px] italic mr-0.5">
+          <span v-if="message.edited_at" class="text-[10px] italic mr-0.5">
             edited
           </span>
           <span>{{ formattedTime }}</span>
-          <ReadReceipt v-if="isSentByMe && !message.is_deleted" :is-read="message.is_read" />
+          <ReadReceipt v-if="isSentByMe" :is-read="message.is_read" />
         </div>
       </template>
     </div>

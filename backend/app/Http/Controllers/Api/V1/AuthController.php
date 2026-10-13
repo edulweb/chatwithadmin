@@ -65,7 +65,7 @@ class AuthController extends Controller
         RateLimiter::clear($throttleKey);
 
         $user->update(['last_seen_at' => now()]);
-        $token = $user->createToken('chatbox_token')->plainTextToken;
+        $token = $user->createToken('connectly_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',

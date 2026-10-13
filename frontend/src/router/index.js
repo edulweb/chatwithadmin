@@ -53,8 +53,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('chatbox_token')
-  const rawUser = localStorage.getItem('chatbox_user')
+  const token = localStorage.getItem('connectly_token')
+  const rawUser = localStorage.getItem('connectly_user')
   const user = rawUser ? JSON.parse(rawUser) : null
 
   if (to.name === 'register') {

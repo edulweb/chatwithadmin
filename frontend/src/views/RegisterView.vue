@@ -56,7 +56,7 @@ async function handleRegister() {
 <template>
   <div class="min-h-screen w-full flex items-center justify-center p-4 bg-slate-50 dark:bg-gray-950 font-sans select-none">
     <div class="w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 p-8 sm:p-10">
-      <!-- ChatBox Logo & Header -->
+      <!-- connectly Logo & Header -->
       <div class="flex flex-col items-center text-center mb-6">
         <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 mb-3">
           <ShieldCheck class="w-8 h-8" />

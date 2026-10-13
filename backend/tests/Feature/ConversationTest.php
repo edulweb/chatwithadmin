@@ -101,4 +101,94 @@ class ConversationTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_user_can_clear_all_chat_from_their_side(): void
+    {
+        $user1 = User::factory()->create(['username' => 'user1', 'is_admin' => true]);
+        $user2 = User::factory()->create(['username' => 'user2']);
+
+        $pair = Conversation::makeCanonicalPair($user1->id, $user2->id);
+        $conv = Conversation::create(['canonical_pair' => $pair, 'type' => 'direct']);
+        ConversationMember::create(['conversation_id' => $conv->id, 'user_id' => $user1->id]);
+        ConversationMember::create(['conversation_id' => $conv->id, 'user_id' => $user2->id]);
+
+        // Send two messages
+        $msg1 = \App\Models\Message::create([
+            'conversation_id' => $conv->id,
+            'sender_id' => $user1->id,
+            'body' => 'Hello from user1',
+        ]);
+        $msg2 = \App\Models\Message::create([
+            'conversation_id' => $conv->id,
+            'sender_id' => $user2->id,
+            'body' => 'Hello from user2',
+        ]);
+
+        // User 2 clears chat from their side
+        $clearRes = $this->actingAs($user2)->postJson("/api/v1/conversations/{$conv->id}/clear");
+        $clearRes->assertStatus(200);
+
+        // User 2 sees 0 messages
+        $user2Messages = $this->actingAs($user2)->getJson("/api/v1/conversations/{$conv->id}/messages");
+        $user2Messages->assertStatus(200)->assertJsonCount(0, 'data');
+
+        // User 1 still sees both messages intact
+        $user1Messages = $this->actingAs($user1)->getJson("/api/v1/conversations/{$conv->id}/messages");
+        $user1Messages->assertStatus(200)->assertJsonCount(2, 'data');
+
+        // Conversations list: User 2 sees latest_message null, User 1 sees latest_message as msg2
+        $user2Convs = $this->actingAs($user2)->getJson('/api/v1/conversations');
+        $this->assertNull($user2Convs->json('data.0.latest_message'));
+
+        $user1Convs = $this->actingAs($user1)->getJson('/api/v1/conversations');
+        $this->assertEquals($msg2->id, $user1Convs->json('data.0.latest_message.id'));
+
+        // A new message arrives
+        $msg3 = \App\Models\Message::create([
+            'conversation_id' => $conv->id,
+            'sender_id' => $user1->id,
+            'body' => 'New message after clear',
+        ]);
+
+        // User 2 now sees only msg3
+        $user2MessagesAfter = $this->actingAs($user2)->getJson("/api/v1/conversations/{$conv->id}/messages");
+        $user2MessagesAfter->assertStatus(200)->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $msg3->id);
+
+        // User 1 sees all 3 messages
+        $user1MessagesAfter = $this->actingAs($user1)->getJson("/api/v1/conversations/{$conv->id}/messages");
+        $user1MessagesAfter->assertStatus(200)->assertJsonCount(3, 'data');
+    }
+
+    public function test_typing_endpoint_validates_and_broadcasts(): void
+    {
+        $user1 = User::factory()->create(['username' => 'user1', 'is_admin' => true]);
+        $user2 = User::factory()->create(['username' => 'user2']);
+
+        $pair = Conversation::makeCanonicalPair($user1->id, $user2->id);
+        $conv = Conversation::create(['canonical_pair' => $pair, 'type' => 'direct']);
+        ConversationMember::create(['conversation_id' => $conv->id, 'user_id' => $user1->id]);
+        ConversationMember::create(['conversation_id' => $conv->id, 'user_id' => $user2->id]);
+
+        // Valid is_typing true
+        $res = $this->actingAs($user1)->postJson("/api/v1/conversations/{$conv->id}/typing", [
+            'is_typing' => true,
+        ]);
+        $res->assertStatus(200)
+            ->assertJsonPath('is_typing', true);
+
+        // Valid is_typing false
+        $resFalse = $this->actingAs($user1)->postJson("/api/v1/conversations/{$conv->id}/typing", [
+            'is_typing' => false,
+        ]);
+        $resFalse->assertStatus(200)
+            ->assertJsonPath('is_typing', false);
+
+        // Validation fails if non-boolean passed
+        $resInvalid = $this->actingAs($user1)->postJson("/api/v1/conversations/{$conv->id}/typing", [
+            'is_typing' => 'not-a-boolean-value',
+        ]);
+        $resInvalid->assertStatus(422)
+            ->assertJsonValidationErrors(['is_typing']);
+    }
 }

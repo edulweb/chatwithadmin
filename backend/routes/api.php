@@ -73,6 +73,7 @@ Route::prefix('v1')->group(function () {
         Route::post('conversations/{conversation}/messages', [ConversationController::class, 'sendMessage']);
         Route::post('conversations/{conversation}/read', [ConversationController::class, 'markAsRead']);
         Route::post('conversations/{conversation}/typing', [ConversationController::class, 'typing']);
+        Route::post('conversations/{conversation}/clear', [ConversationController::class, 'clearChat']);
 
         // Messages
         Route::patch('messages/{message}', [MessageController::class, 'update']);

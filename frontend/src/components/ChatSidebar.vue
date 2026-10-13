@@ -35,7 +35,7 @@ function clearSearch() {
 
 <template>
   <aside class="w-full md:w-80 lg:w-96 h-full flex flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-colors select-none">
-    <!-- Top Bar: ChatBox Branding & Actions -->
+    <!-- Top Bar: connectly Branding & Actions -->
     <div class="h-16 px-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
       <div class="flex items-center gap-2.5">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
@@ -43,7 +43,7 @@ function clearSearch() {
         </div>
         <div>
           <h1 class="text-base font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent leading-none">
-            ChatBox
+            Connectly
           </h1>
           <span class="text-[10px] text-gray-400 font-medium">Personal Messenger</span>
         </div>
@@ -73,7 +73,7 @@ function clearSearch() {
         </button>
 
         <!-- Theme Toggle -->
-        <button
+        <!-- <button
           type="button"
           class="p-2 rounded-xl text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           :title="settingsStore.theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'"
@@ -81,7 +81,7 @@ function clearSearch() {
         >
           <Moon v-if="settingsStore.theme === 'dark'" class="w-4 h-4" />
           <Sun v-else class="w-4 h-4" />
-        </button>
+        </button> -->
 
         <!-- Settings -->
         <button

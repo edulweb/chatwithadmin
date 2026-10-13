@@ -4,7 +4,8 @@ import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  base: command === 'build' ? '' : '',
   plugins: [
     tailwindcss(),
     vue(),
@@ -18,4 +19,4 @@ export default defineConfig({
     port: 5173,
     host: true,
   },
-})
+}))

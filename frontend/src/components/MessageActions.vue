@@ -6,10 +6,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  isDeleted: {
-    type: Boolean,
-    default: false,
-  },
 })
 
 const emit = defineEmits(['reply', 'copy', 'edit', 'delete'])
@@ -20,7 +16,6 @@ const emit = defineEmits(['reply', 'copy', 'edit', 'delete'])
     class="flex items-center gap-0.5 bg-white/95 dark:bg-gray-800/95 backdrop-blur shadow-md border border-gray-100 dark:border-gray-700/80 rounded-lg p-1 text-gray-500 dark:text-gray-400 select-none"
   >
     <button
-      v-if="!isDeleted"
       type="button"
       class="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-md transition-colors"
       title="Reply"
@@ -30,7 +25,6 @@ const emit = defineEmits(['reply', 'copy', 'edit', 'delete'])
     </button>
 
     <button
-      v-if="!isDeleted"
       type="button"
       class="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 rounded-md transition-colors"
       title="Copy text"
@@ -40,7 +34,7 @@ const emit = defineEmits(['reply', 'copy', 'edit', 'delete'])
     </button>
 
     <button
-      v-if="isSentByMe && !isDeleted"
+      v-if="isSentByMe"
       type="button"
       class="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-md transition-colors"
       title="Edit message"
@@ -50,7 +44,7 @@ const emit = defineEmits(['reply', 'copy', 'edit', 'delete'])
     </button>
 
     <button
-      v-if="isSentByMe && !isDeleted"
+      v-if="isSentByMe"
       type="button"
       class="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-rose-600 dark:hover:text-rose-400 rounded-md transition-colors"
       title="Delete message"

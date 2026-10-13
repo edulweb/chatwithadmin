@@ -4,7 +4,7 @@ import { ref } from 'vue'
 export const useSettingsStore = defineStore('settings', () => {
   const getInitialTheme = () => {
     try {
-      const saved = localStorage.getItem('chatbox_theme')
+      const saved = localStorage.getItem('connectly_theme')
       if (saved) return saved
       return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     } catch (e) {
@@ -17,7 +17,7 @@ export const useSettingsStore = defineStore('settings', () => {
   function applyTheme(newTheme) {
     theme.value = newTheme
     try {
-      localStorage.setItem('chatbox_theme', newTheme)
+      localStorage.setItem('connectly_theme', newTheme)
     } catch (e) {}
 
     if (newTheme === 'dark') {

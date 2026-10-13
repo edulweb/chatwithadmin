@@ -157,10 +157,17 @@ class ConversationController extends Controller
         $limit = min((int) $request->input('limit', 30), 100);
         $beforeId = $request->input('before_id');
         $afterId = $request->input('after_id');
+        $currentUser = $request->user();
+        $member = ConversationMember::where('conversation_id', $conversation->id)
+            ->where('user_id', $currentUser->id)
+            ->first();
 
         $query = $conversation->messages()
-            ->withTrashed()
             ->with(['sender', 'attachments', 'replyTo.sender', 'reads']);
+
+        if ($member && $member->cleared_message_id) {
+            $query->where('id', '>', $member->cleared_message_id);
+        }
 
         if ($beforeId) {
             $query->where('id', '<', $beforeId);
@@ -323,6 +330,10 @@ class ConversationController extends Controller
     {
         Gate::authorize('view', $conversation);
 
+        $request->validate([
+            'is_typing' => ['sometimes', 'boolean'],
+        ]);
+
         $isTyping = $request->boolean('is_typing', true);
 
         // Ephemeral broadcast, zero DB row created
@@ -330,6 +341,27 @@ class ConversationController extends Controller
 
         return response()->json([
             'message' => 'Typing status broadcasted',
+            'is_typing' => $isTyping,
+        ]);
+    }
+
+    public function clearChat(Request $request, Conversation $conversation): JsonResponse
+    {
+        Gate::authorize('view', $conversation);
+
+        $userId = $request->user()->id;
+        $latestMessageId = $conversation->messages()->max('id') ?? 0;
+
+        ConversationMember::where('conversation_id', $conversation->id)
+            ->where('user_id', $userId)
+            ->update([
+                'cleared_at' => now(),
+                'cleared_message_id' => $latestMessageId,
+            ]);
+
+        return response()->json([
+            'message' => 'Chat cleared successfully',
+            'cleared_message_id' => $latestMessageId,
         ]);
     }
 }

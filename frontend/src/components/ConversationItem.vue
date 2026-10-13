@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { Image, FileText, Ban } from 'lucide-vue-next'
+import { Image, FileText } from 'lucide-vue-next'
 import UserAvatar from './UserAvatar.vue'
 import { useChatStore } from '@/stores/chatStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -42,7 +42,6 @@ const formattedTime = computed(() => {
 const messageSnippet = computed(() => {
   const msg = props.conversation.latest_message
   if (!msg) return 'No messages yet'
-  if (msg.is_deleted) return 'This message was deleted'
   if (msg.body) return msg.body
   if (msg.type === 'file' || msg.attachments?.length > 0) {
     const isImg = msg.attachments?.[0]?.is_image
@@ -53,16 +52,12 @@ const messageSnippet = computed(() => {
 
 const isSnippetImage = computed(() => {
   const msg = props.conversation.latest_message
-  return msg && !msg.is_deleted && msg.attachments?.some((a) => a.is_image) && !msg.body
+  return msg && msg.attachments?.some((a) => a.is_image) && !msg.body
 })
 
 const isSnippetDoc = computed(() => {
   const msg = props.conversation.latest_message
-  return msg && !msg.is_deleted && msg.attachments?.some((a) => !a.is_image) && !msg.body
-})
-
-const isSnippetDeleted = computed(() => {
-  return props.conversation.latest_message?.is_deleted
+  return msg && msg.attachments?.some((a) => !a.is_image) && !msg.body
 })
 </script>
 
@@ -109,10 +104,9 @@ const isSnippetDeleted = computed(() => {
 
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 truncate">
-          <Ban v-if="isSnippetDeleted" class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 italic" />
-          <Image v-else-if="isSnippetImage" class="w-3.5 h-3.5 flex-shrink-0 text-indigo-500" />
+          <Image v-if="isSnippetImage" class="w-3.5 h-3.5 flex-shrink-0 text-indigo-500" />
           <FileText v-else-if="isSnippetDoc" class="w-3.5 h-3.5 flex-shrink-0 text-indigo-500" />
-          <span class="truncate" :class="{ 'italic text-gray-400': isSnippetDeleted }">
+          <span class="truncate">
             {{ messageSnippet }}
           </span>
         </div>

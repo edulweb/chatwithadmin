@@ -4,8 +4,8 @@ import api from '@/services/api'
 import { disconnectEcho } from '@/services/echo'
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref(localStorage.getItem('chatbox_token') || null)
-  const user = ref(JSON.parse(localStorage.getItem('chatbox_user') || 'null'))
+  const token = ref(localStorage.getItem('connectly_token') || null)
+  const user = ref(JSON.parse(localStorage.getItem('connectly_user') || 'null'))
   const loading = ref(false)
   const error = ref(null)
 
@@ -19,8 +19,8 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.post('/auth/register', form)
       token.value = response.data.data.token
       user.value = response.data.data.user
-      localStorage.setItem('chatbox_token', token.value)
-      localStorage.setItem('chatbox_user', JSON.stringify(user.value))
+      localStorage.setItem('connectly_token', token.value)
+      localStorage.setItem('connectly_user', JSON.stringify(user.value))
       return response.data
     } catch (err) {
       error.value = err.response?.data?.message || 'Registration failed'
@@ -37,8 +37,8 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.post('/auth/login', form)
       token.value = response.data.data.token
       user.value = response.data.data.user
-      localStorage.setItem('chatbox_token', token.value)
-      localStorage.setItem('chatbox_user', JSON.stringify(user.value))
+      localStorage.setItem('connectly_token', token.value)
+      localStorage.setItem('connectly_user', JSON.stringify(user.value))
       return response.data
     } catch (err) {
       error.value = err.response?.data?.message || 'Login failed'
@@ -58,8 +58,8 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       token.value = null
       user.value = null
-      localStorage.removeItem('chatbox_token')
-      localStorage.removeItem('chatbox_user')
+      localStorage.removeItem('connectly_token')
+      localStorage.removeItem('connectly_user')
       disconnectEcho()
     }
   }
@@ -67,8 +67,8 @@ export const useAuthStore = defineStore('auth', () => {
   function forceLogoutDisabled(reason = 'Your account has been disabled by an administrator.') {
     token.value = null
     user.value = null
-    localStorage.removeItem('chatbox_token')
-    localStorage.removeItem('chatbox_user')
+    localStorage.removeItem('connectly_token')
+    localStorage.removeItem('connectly_user')
     disconnectEcho()
     sessionStorage.setItem('auth_notice', reason)
     alert(reason)
@@ -82,7 +82,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await api.get('/me')
       user.value = response.data.data
-      localStorage.setItem('chatbox_user', JSON.stringify(user.value))
+      localStorage.setItem('connectly_user', JSON.stringify(user.value))
       return user.value
     } catch (err) {
       if (err.response?.status === 401) {
@@ -105,12 +105,12 @@ export const useAuthStore = defineStore('auth', () => {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
         user.value = response.data.data
-        localStorage.setItem('chatbox_user', JSON.stringify(user.value))
+        localStorage.setItem('connectly_user', JSON.stringify(user.value))
         return response.data
       } else {
         const response = await api.patch('/me', formData)
         user.value = response.data.data
-        localStorage.setItem('chatbox_user', JSON.stringify(user.value))
+        localStorage.setItem('connectly_user', JSON.stringify(user.value))
         return response.data
       }
     } catch (err) {
@@ -198,7 +198,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.post('/auth/verify-email-change', { token: tokenValue })
       if (response.data?.data && user.value && user.value.id === response.data.data.id) {
         user.value = response.data.data
-        localStorage.setItem('chatbox_user', JSON.stringify(user.value))
+        localStorage.setItem('connectly_user', JSON.stringify(user.value))
       }
       return response.data
     } catch (err) {

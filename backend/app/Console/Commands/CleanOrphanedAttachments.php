@@ -13,7 +13,7 @@ class CleanOrphanedAttachments extends Command
      *
      * @var string
      */
-    protected $signature = 'chatbox:clean-orphaned-attachments';
+    protected $signature = 'connectly:clean-orphaned-attachments';
 
     /**
      * The console command description.
