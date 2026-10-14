@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Support\UrlHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -15,7 +16,7 @@ class AccountActivationNotification extends Notification
         public string $token,
         public ?string $activationUrl = null
     ) {
-        $baseUrl = rtrim((string) config('app.frontend_url', config('app.url')), '/');
+        $baseUrl = UrlHelper::frontendUrl();
         $this->activationUrl = $this->activationUrl ?: ($baseUrl . '/activate-account?token=' . urlencode($this->token));
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Support\UrlHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -16,13 +17,7 @@ class ResetPasswordNotification extends Notification
         public string $email,
         public ?string $resetUrl = null
     ) {
-        $baseUrl = rtrim((string) config('app.frontend_url', config('app.url')), '/');
-        if (!app()->runningInConsole() && request()) {
-            $host = request()->getHost();
-            if ($host && !in_array($host, ['localhost', '127.0.0.1'], true) && !str_ends_with($host, '.test')) {
-                $baseUrl = rtrim(request()->root(), '/');
-            }
-        }
+        $baseUrl = UrlHelper::frontendUrl();
         $this->resetUrl = $this->resetUrl ?: ($baseUrl . '/reset-password?token=' . urlencode($this->token) . '&email=' . urlencode($this->email));
     }
 

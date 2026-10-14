@@ -49,7 +49,12 @@ const handleResetPassword = async () => {
     })
     isSuccess.value = true
   } catch (err) {
-    errorMessage.value = err.response?.data?.message || 'Failed to reset password. The link may have expired.'
+    const errors = err.response?.data?.errors
+    if (errors) {
+      errorMessage.value = Object.values(errors).flat().join(' ')
+    } else {
+      errorMessage.value = err.response?.data?.message || 'Failed to reset password. The link may have expired.'
+    }
   } finally {
     isSubmitting.value = false
   }
@@ -86,7 +91,7 @@ const handleResetPassword = async () => {
         <button
           type="button"
           class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-md shadow-indigo-600/20 cursor-pointer"
-          @click="router.push('/login')"
+          @click="router.push({ name: 'login' })"
         >
           Sign In Now
         </button>
@@ -156,7 +161,7 @@ const handleResetPassword = async () => {
         </button>
 
         <div class="pt-2 text-center">
-          <router-link to="/login" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
+          <router-link :to="{ name: 'login' }" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
             Back to Sign In
           </router-link>
         </div>

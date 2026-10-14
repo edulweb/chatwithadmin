@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import api from '@/services/api'
 import { disconnectEcho } from '@/services/echo'
+import { getAppBasePath } from '@/router'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('connectly_token') || null)
@@ -72,8 +73,10 @@ export const useAuthStore = defineStore('auth', () => {
     disconnectEcho()
     sessionStorage.setItem('auth_notice', reason)
     alert(reason)
-    if (window.location.pathname !== '/login') {
-      window.location.href = '/login'
+    const base = getAppBasePath().replace(/\/$/, '')
+    const loginUrl = base !== '' ? `${base}/login` : '/login'
+    if (!window.location.pathname.endsWith('/login')) {
+      window.location.href = loginUrl
     }
   }
 

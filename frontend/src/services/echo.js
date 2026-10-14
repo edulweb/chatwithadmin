@@ -1,5 +1,6 @@
 import Echo from 'laravel-echo'
 import Pusher from 'pusher-js'
+import { getApiBaseUrl } from '@/services/api'
 
 window.Pusher = Pusher
 
@@ -21,7 +22,7 @@ try {
  */
 export async function initBroadcasting() {
   try {
-    const apiBase = import.meta.env.VITE_API_BASE_URL || '/api/v1'
+    const apiBase = getApiBaseUrl()
     const res = await fetch(`${apiBase}/broadcasting/config`, {
       headers: { Accept: 'application/json' },
     })
@@ -64,7 +65,7 @@ export function getEcho() {
     return echoInstance
   }
 
-  const apiBase = import.meta.env.VITE_API_BASE_URL || '/api/v1'
+  const apiBase = getApiBaseUrl()
   const rootUrl = apiBase.replace(/\/api\/v1\/?$/, '')
 
   // Determine active driver: dynamic API > cached config > env variable > default 'pusher'

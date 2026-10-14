@@ -64,7 +64,7 @@ onMounted(async () => {
         <button
           type="button"
           class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-md shadow-indigo-600/20 cursor-pointer"
-          @click="router.push(authStore.isAuthenticated ? '/' : '/login')"
+          @click="router.push(authStore.isAuthenticated ? { name: 'chat' } : { name: 'login' })"
         >
           {{ authStore.isAuthenticated ? 'Back to Chat' : 'Sign In Now' }}
         </button>
@@ -84,7 +84,7 @@ onMounted(async () => {
         <button
           type="button"
           class="w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-xs transition-colors cursor-pointer"
-          @click="router.push(authStore.isAuthenticated ? '/' : '/login')"
+          @click="router.push(authStore.isAuthenticated ? { name: 'chat' } : { name: 'login' })"
         >
           {{ authStore.isAuthenticated ? 'Back to App' : 'Back to Login' }}
         </button>

@@ -34,7 +34,7 @@ async function handleLogin() {
       login: loginInput.value,
       password: password.value,
     })
-    router.push('/')
+    router.push({ name: 'chat' })
   } catch (err) {
     const msg = err.response?.data?.errors?.login?.[0] || err.response?.data?.message || 'Login failed'
     errorMessage.value = msg

@@ -22,6 +22,12 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # Handle direct assets requested with a subfolder prefix (e.g. /connectly/assets/... or /subdir/assets/...)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(?:.+/)?(assets/.+)$ $1 [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(?:.+/)?(favicon\.ico|robots\.txt)$ $1 [L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f

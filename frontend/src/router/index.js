@@ -6,8 +6,43 @@ import ActivateAccountView from '@/views/ActivateAccountView.vue'
 import ResetPasswordView from '@/views/ResetPasswordView.vue'
 import VerifyEmailChangeView from '@/views/VerifyEmailChangeView.vue'
 
+export function getAppBasePath() {
+  // 1. Injected dynamic runtime config from Laravel
+  if (typeof window !== 'undefined' && window.__APP_CONFIG__?.basePath) {
+    return window.__APP_CONFIG__.basePath
+  }
+
+  // 2. HTML <base href="...">
+  if (typeof document !== 'undefined') {
+    const baseEl = document.querySelector('base')
+    const href = baseEl?.getAttribute('href')
+    if (href && href !== './') {
+      return href.endsWith('/') ? href : `${href}/`
+    }
+  }
+
+  // 3. Dynamic subfolder detection from current URL path:
+  // e.g. /connectly/login -> subfolder is /connectly/
+  // /my-app/activate-account -> subfolder is /my-app/
+  // /login or / -> root '/'
+  if (typeof window !== 'undefined' && window.location?.pathname) {
+    const knownRoutes = ['login', 'register', 'activate-account', 'reset-password', 'verify-email-change']
+    const segments = window.location.pathname.split('/').filter(Boolean)
+
+    if (segments.length >= 2 && knownRoutes.includes(segments[segments.length - 1])) {
+      return '/' + segments.slice(0, -1).join('/') + '/'
+    }
+
+    if (segments.length === 1 && !knownRoutes.includes(segments[0])) {
+      return '/' + segments[0] + '/'
+    }
+  }
+
+  return '/'
+}
+
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(getAppBasePath()),
   routes: [
     {
       path: '/',
