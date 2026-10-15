@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
   user: {
@@ -33,7 +33,12 @@ const displayName = computed(() => {
 })
 
 const resolvedAvatar = computed(() => {
-  return props.user?.avatar_url || props.avatarUrl || null
+  return props.avatarUrl || props.user?.avatar_url || null
+})
+
+const imageError = ref(false)
+watch(resolvedAvatar, () => {
+  imageError.value = false
 })
 
 const initials = computed(() => {
@@ -101,11 +106,11 @@ const avatarBg = computed(() => {
       ]"
     >
       <img
-        v-if="resolvedAvatar"
+        v-if="resolvedAvatar && !imageError"
         :src="resolvedAvatar"
         :alt="displayName"
         class="w-full h-full object-cover"
-        @error="(e) => e.target.style.display = 'none'"
+        @error="imageError = true"
       />
       <span v-else>{{ initials }}</span>
     </div>

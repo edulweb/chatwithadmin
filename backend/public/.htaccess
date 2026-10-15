@@ -26,6 +26,8 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^(?:.+/)?(assets/.+)$ $1 [L]
     RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(?:.+/)?(storage/.+)$ $1 [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^(?:.+/)?(favicon\.ico|robots\.txt)$ $1 [L]
 
     # Send Requests To Front Controller...

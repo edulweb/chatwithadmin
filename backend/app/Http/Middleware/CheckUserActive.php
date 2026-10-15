@@ -25,7 +25,7 @@ class CheckUserActive
             }
 
             return response()->json([
-                'message' => 'Your account has been disabled by an administrator. Please contact support.',
+                'message' => 'Your account has been disabled. Please contact support.',
                 'account_disabled' => true,
             ], 403);
         }

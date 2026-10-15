@@ -65,14 +65,13 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function forceLogoutDisabled(reason = 'Your account has been disabled by an administrator.') {
+  function forceLogoutDisabled(reason = 'Your account has been disabled.') {
     token.value = null
     user.value = null
     localStorage.removeItem('connectly_token')
     localStorage.removeItem('connectly_user')
     disconnectEcho()
     sessionStorage.setItem('auth_notice', reason)
-    alert(reason)
     const base = getAppBasePath().replace(/\/$/, '')
     const loginUrl = base !== '' ? `${base}/login` : '/login'
     if (!window.location.pathname.endsWith('/login')) {

@@ -73,7 +73,8 @@ function adjustTextareaHeight() {
 }
 
 function handleKeydown(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
+  // Allow submission via Ctrl+Enter or Cmd+Enter; plain Enter creates a newline
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
     e.preventDefault()
     handleSubmit()
   }
@@ -255,7 +256,8 @@ async function handleSubmit() {
         type="submit"
         :disabled="(!text.trim() && !selectedFile) || isSubmitting"
         class="p-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:hover:bg-indigo-600 text-white shadow-sm transition-all flex-shrink-0 flex items-center justify-center focus:outline-none cursor-pointer"
-        title="Send message (Enter)"
+        title="Send message"
+        aria-label="Send message"
       >
         <Send class="w-4 h-4" />
       </button>

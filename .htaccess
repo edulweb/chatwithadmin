@@ -23,8 +23,9 @@
     RewriteCond %{HTTP:x-xsrf-token} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
-    # Direct static assets (css, js, media, favicon, robots) whether accessed from root or subfolder
+    # Direct static assets (css, js, media, favicon, robots, storage) whether accessed from root or subfolder
     RewriteRule ^(?:.+/)?(assets/.*)$ backend/public/$1 [L]
+    RewriteRule ^(?:.+/)?(storage/.*)$ backend/public/$1 [L]
     RewriteRule ^(?:.+/)?(favicon\.ico|robots\.txt)$ backend/public/$1 [L]
 
     # Rewrite all traffic to backend/public directory (supports root & subfolder deployments)

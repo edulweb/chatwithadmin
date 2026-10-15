@@ -48,7 +48,7 @@ api.interceptors.response.use(
         localStorage.removeItem('connectly_token')
         localStorage.removeItem('connectly_user')
         if (error.response.data?.account_disabled) {
-          sessionStorage.setItem('auth_notice', error.response.data.message || 'Your account has been disabled by an administrator.')
+          sessionStorage.setItem('auth_notice', error.response.data.message || 'Your account has been disabled.')
         }
         const base = getAppBasePath().replace(/\/$/, '')
         const loginUrl = base !== '' ? `${base}/login` : '/login'

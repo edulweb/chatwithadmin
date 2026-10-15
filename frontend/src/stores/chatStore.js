@@ -453,7 +453,7 @@ export const useChatStore = defineStore('chat', () => {
       echo.private(`user.${authStore.user.id}`)
         .listen('UserDisabled', (e) => {
           console.warn('Received UserDisabled event:', e)
-          authStore.forceLogoutDisabled(e.reason || 'Your account has been disabled by an administrator.')
+          authStore.forceLogoutDisabled(e.reason || 'Your account has been disabled')
         })
     }
 

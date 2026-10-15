@@ -51,7 +51,7 @@ class AuthController extends Controller
         if ($user->isDisabled()) {
             RateLimiter::hit($throttleKey, 60);
             throw ValidationException::withMessages([
-                'login' => ['Your account has been disabled by an administrator. Please contact support.'],
+                'login' => ['Your account has been disabled. Please contact support.'],
             ])->status(403);
         }
 

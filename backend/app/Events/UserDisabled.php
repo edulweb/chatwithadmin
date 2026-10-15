@@ -14,7 +14,7 @@ class UserDisabled implements ShouldBroadcastNow
 
     public function __construct(
         public int $userId,
-        public string $reason = 'Your account has been disabled by an administrator.'
+        public string $reason = 'Your account has been disabled.'
     ) {
     }
 

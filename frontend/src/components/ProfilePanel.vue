@@ -48,6 +48,8 @@ async function handleProfileSubmit() {
     }
 
     await authStore.updateProfile(formData)
+    avatarFile.value = null
+    avatarPreview.value = null
     statusMessage.value = 'Profile updated successfully!'
     setTimeout(() => (statusMessage.value = null), 4000)
   } catch (err) {
