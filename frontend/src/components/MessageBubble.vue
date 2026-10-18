@@ -8,6 +8,7 @@ import VideoPlayer from './VideoPlayer.vue'
 import AudioPlayer from './AudioPlayer.vue'
 import FileAttachment from './FileAttachment.vue'
 import MessageActions from './MessageActions.vue'
+import { parseMessageText } from '@/utils/linkify'
 import { useAuthStore } from '@/stores/authStore'
 import { useChatStore } from '@/stores/chatStore'
 
@@ -37,6 +38,10 @@ const formattedTime = computed(() => {
   if (!props.message.created_at) return ''
   const date = new Date(props.message.created_at)
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+})
+
+const parsedBody = computed(() => {
+  return parseMessageText(props.message.body)
 })
 
 function getAttachmentCategory(a) {
@@ -252,7 +257,23 @@ async function handleDelete() {
           v-if="message.body"
           class="text-sm leading-relaxed whitespace-pre-wrap break-words select-text"
         >
-          {{ message.body }}
+          <template v-for="(part, index) in parsedBody" :key="index">
+            <a
+              v-if="part.type === 'link'"
+              :href="part.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              :class="[
+                'underline underline-offset-2 break-all font-medium transition-colors',
+                isSentByMe
+                  ? 'text-white hover:text-indigo-100 hover:opacity-90'
+                  : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300'
+              ]"
+              :title="part.href"
+              @click.stop
+            >{{ part.text }}</a>
+            <template v-else>{{ part.text }}</template>
+          </template>
         </p>
 
         <!-- Timestamp and status -->
